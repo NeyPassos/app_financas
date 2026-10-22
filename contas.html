@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Contas a Pagar | App Finanças</title>
+  <link rel="stylesheet" href="css/contas.css">
+</head>
+
+<body>
+  <header class="topo">
+    <div>
+      <h1>App Finanças</h1>
+      <p>Contas a pagar</p>
+    </div>
+    <div class="acoes-login"><button id="btnLogin" class="btn btn-primario" type="button">Entrar com
+        Google</button><button id="btnSair" class="btn btn-neutro" type="button" hidden>Sair</button></div>
+  </header>
+  <main>
+    <p id="status" role="status" aria-live="polite">Aguardando autenticação.</p>
+    <section class="indicadores" aria-label="Resumo financeiro">
+      <article><span>Total filtrado</span><strong id="resumoTotal">R$ 0,00</strong></article>
+      <article><span>Pendente</span><strong id="resumoPendente">R$ 0,00</strong></article>
+      <article><span>Pago</span><strong id="resumoPago">R$ 0,00</strong></article>
+      <article><span>Registros</span><strong id="resumoQuantidade">0</strong></article>
+    </section>
+    <section class="painel">
+      <div class="barra">
+        <h2>Minhas contas</h2><button class="btn btn-primario" id="btnNova" type="button" disabled>+ Nova conta</button>
+      </div>
+      <div class="filtros"><label>Pesquisar<input id="pesquisa" type="search"
+            placeholder="Conta, parcela ou situação"></label><label>Ano<select id="filtroAno">
+            <option value="">Todos</option>
+          </select></label><label>Mês<select id="filtroMes">
+            <option value="">Todos</option>
+          </select></label><label>Situação<select id="filtroSituacao">
+            <option value="">Todas</option>
+            <option value="Pendente">Pendente</option>
+            <option value="Pago">Pago</option>
+          </select></label></div>
+      <div class="tabela-rolagem">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Vencimento</th>
+              <th>Conta</th>
+              <th>Parcela</th>
+              <th>Valor</th>
+              <th>Situação</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="listaContas">
+            <tr>
+              <td colspan="7" class="vazio">Faça login para carregar as contas.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="paginacao"><span id="infoPagina">0 registros</span>
+        <div><button class="btn btn-neutro" id="paginaAnterior" type="button" disabled>Anterior</button><button
+            class="btn btn-neutro" id="paginaProxima" type="button" disabled>Próxima</button></div>
+      </div>
+    </section>
+  </main>
+  <div class="modal" id="modalConta" hidden>
+    <div class="janela" role="dialog" aria-modal="true" aria-labelledby="tituloModal">
+      <div class="modal-topo">
+        <h2 id="tituloModal">Nova conta</h2><button class="fechar" id="fecharConta" type="button"
+          aria-label="Fechar">×</button>
+      </div>
+      <form id="formConta">
+        <div class="campos"><label>Ano<input name="ano" id="ano" type="number" min="1900" max="9999"
+              required></label><label>Mês<select name="mes" id="mes" required></select></label><label>Dia do
+            vencimento<input name="dia" id="dia" type="number" min="1" max="31" required></label><label>Tipo da
+            conta<input name="tipo_conta" id="tipo_conta" maxlength="150" required></label><label>Parcela<input
+              name="parcela" id="parcela" placeholder="Ex.: 1/12"></label><label>Valor (R$)<input name="valor"
+              id="valor" type="number" min="0" step="0.01" required></label><label>Situação<select name="situacao"
+              id="situacao">
+              <option>Pendente</option>
+              <option>Pago</option>
+            </select></label></div>
+        <div class="modal-acoes"><button type="button" class="btn btn-neutro"
+            id="cancelarConta">Cancelar</button><button type="submit" class="btn btn-primario"
+            id="salvarConta">Salvar</button></div>
+      </form>
+    </div>
+  </div>
+  <div class="modal" id="modalExcluir" hidden>
+    <div class="janela janela-pequena" role="dialog" aria-modal="true" aria-labelledby="tituloExcluir">
+      <h2 id="tituloExcluir">Excluir conta?</h2>
+      <p id="descricaoExcluir"></p>
+      <div class="modal-acoes"><button type="button" class="btn btn-neutro"
+          id="cancelarExcluir">Cancelar</button><button type="button" class="btn btn-perigo"
+          id="confirmarExcluir">Excluir</button></div>
+    </div>
+  </div>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/contas.js"></script>
+</body>
+
+</html>
