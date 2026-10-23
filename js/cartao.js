@@ -101,27 +101,27 @@ function configurarEventosCartao() {
 
     }
 
-      /* ==========================================
-     EVENTOS IMPORTAÇÃO
-  ========================================== */
+          /* ==========================================
+        EVENTOS DO MODAL DE IMPORTAÇÃO
+      ========================================== */
 
-  document.getElementById("btnImportarFatura")
-    .addEventListener("click", abrirModalImportacao);
+      const btnImportarFatura =
+        document.getElementById("btnImportarFatura");
 
-  document.getElementById("btnFecharImportacao")
-    .addEventListener("click", fecharModalImportacao);
+      if (btnImportarFatura) {
 
-  document.getElementById("btnCancelarImportacao")
-    .addEventListener("click", fecharModalImportacao);
+        btnImportarFatura.addEventListener(
+          "click",
+          abrirModalImportacao
+        );
 
-  document.getElementById("modalImportarFatura")
-    .addEventListener("click", evento => {
-
-      if (evento.target.id === "modalImportarFatura") {
-        fecharModalImportacao();
       }
 
-    });
+      document.getElementById("btnFecharImportacao")
+        ?.addEventListener("click", fecharModalImportacao);
+
+      document.getElementById("btnCancelarImportacao")
+        ?.addEventListener("click", fecharModalImportacao);
 
   });
 
