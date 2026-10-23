@@ -10,7 +10,7 @@
   <title>Cartões de Crédito | App Finanças</title>
 
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/cartao.css?v=2">
+  <link rel="stylesheet" href="css/cartao.css?v=3">
 </head>
 
 <body>
@@ -309,6 +309,153 @@
         </button>
 
       </div>
+
+  </div>
+</div>
+
+<!-- ==========================================
+     MODAL IMPORTAR FATURA
+========================================== -->
+
+<div id="modalImportarFatura"
+     class="modal-cartao"
+     hidden>
+
+  <div class="modal-cartao-conteudo modal-importacao"
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="tituloImportarFatura">
+
+    <div class="modal-cartao-cabecalho">
+
+      <h2 id="tituloImportarFatura">
+        Importar fatura
+      </h2>
+
+      <button type="button"
+              id="btnFecharImportacao">
+        Fechar
+      </button>
+
+    </div>
+
+    <form id="formImportarFatura">
+
+      <div class="campo">
+        <label for="importarCartao">
+          Cartão
+        </label>
+
+        <select id="importarCartao" required>
+          <option value="">
+            Selecione um cartão
+          </option>
+        </select>
+      </div>
+
+      <div class="campos-lado-a-lado">
+
+        <div class="campo">
+          <label for="importarMes">
+            Mês da fatura
+          </label>
+
+          <select id="importarMes" required>
+            <option value="">Selecione</option>
+            <option value="1">Janeiro</option>
+            <option value="2">Fevereiro</option>
+            <option value="3">Março</option>
+            <option value="4">Abril</option>
+            <option value="5">Maio</option>
+            <option value="6">Junho</option>
+            <option value="7">Julho</option>
+            <option value="8">Agosto</option>
+            <option value="9">Setembro</option>
+            <option value="10">Outubro</option>
+            <option value="11">Novembro</option>
+            <option value="12">Dezembro</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="importarAno">
+            Ano da fatura
+          </label>
+
+          <input type="number"
+                 id="importarAno"
+                 min="2000"
+                 max="9999"
+                 required>
+        </div>
+
+      </div>
+
+      <div class="campo">
+        <label for="arquivoFatura">
+          Arquivo da fatura
+        </label>
+
+        <input type="file"
+               id="arquivoFatura"
+               accept=".pdf,.csv,application/pdf,text/csv"
+               required>
+
+        <small>
+          Formatos permitidos: PDF ou CSV.
+        </small>
+      </div>
+
+      <div id="resumoImportacao"
+           class="resumo-importacao"
+           hidden>
+
+        <h3>Pré-visualização da fatura</h3>
+
+        <p id="informacoesArquivo"></p>
+
+        <div class="tabela-responsiva">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Descrição</th>
+                <th>Parcela</th>
+                <th>Valor</th>
+              </tr>
+            </thead>
+
+            <tbody id="listaPreviaFatura"></tbody>
+          </table>
+        </div>
+
+        <p id="totalPreviaFatura"></p>
+
+      </div>
+
+      <div class="modal-cartao-acoes">
+
+        <button type="button"
+                id="btnCancelarImportacao">
+          Cancelar
+        </button>
+
+        <button type="button"
+                id="btnAnalisarFatura"
+                class="btn-primario">
+          Analisar arquivo
+        </button>
+
+        <button type="button"
+                id="btnConfirmarImportacao"
+                class="btn-primario"
+                disabled>
+          Confirmar importação
+        </button>
+
+      </div>
+
+    </form>
 
   </div>
 </div>

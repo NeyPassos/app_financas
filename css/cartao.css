@@ -351,3 +351,114 @@ button:focus-visible {
     gap: 10px;
     margin-top: 25px;
 }
+
+/* ==========================================
+   MODAL IMPORTAÇÃO DE FATURAS
+========================================== */
+
+#modalImportarFatura[hidden] {
+    display: none !important;
+}
+
+#modalImportarFatura:not([hidden]) {
+    display: flex;
+}
+
+#modalImportarFatura {
+    position: fixed;
+    inset: 0;
+    z-index: 3500;
+
+    background: rgba(0, 0, 0, 0.55);
+
+    justify-content: center;
+    align-items: center;
+
+    padding: 20px;
+}
+
+#modalImportarFatura .modal-importacao {
+    width: 100%;
+    max-width: 850px;
+    max-height: 90vh;
+
+    overflow-y: auto;
+
+    background: #ffffff;
+    border-radius: 10px;
+
+    padding: 25px;
+
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
+}
+
+#modalImportarFatura .campo {
+    margin-bottom: 18px;
+}
+
+#modalImportarFatura .campo label {
+    display: block;
+    margin-bottom: 7px;
+    font-weight: 600;
+}
+
+#modalImportarFatura .campo input,
+#modalImportarFatura .campo select {
+    width: 100%;
+    padding: 10px 12px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+
+    font-size: 14px;
+}
+
+#modalImportarFatura .campos-lado-a-lado {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+#modalImportarFatura .resumo-importacao {
+    margin-top: 20px;
+    padding: 18px;
+
+    border: 1px solid #d8e2ef;
+    border-radius: 8px;
+
+    background: #f8fafc;
+}
+
+#modalImportarFatura .resumo-importacao h3 {
+    margin-top: 0;
+    color: #1d3557;
+}
+
+#modalImportarFatura .modal-cartao-acoes {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+
+    margin-top: 25px;
+}
+
+#modalImportarFatura button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+
+    #modalImportarFatura .campos-lado-a-lado {
+        grid-template-columns: 1fr;
+    }
+
+    #modalImportarFatura .modal-cartao-acoes {
+        flex-direction: column;
+    }
+
+    #modalImportarFatura .modal-cartao-acoes button {
+        width: 100%;
+    }
+}

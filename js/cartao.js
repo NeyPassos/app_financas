@@ -101,6 +101,28 @@ function configurarEventosCartao() {
 
     }
 
+      /* ==========================================
+     EVENTOS IMPORTAÇÃO
+  ========================================== */
+
+  document.getElementById("btnImportarFatura")
+    .addEventListener("click", abrirModalImportacao);
+
+  document.getElementById("btnFecharImportacao")
+    .addEventListener("click", fecharModalImportacao);
+
+  document.getElementById("btnCancelarImportacao")
+    .addEventListener("click", fecharModalImportacao);
+
+  document.getElementById("modalImportarFatura")
+    .addEventListener("click", evento => {
+
+      if (evento.target.id === "modalImportarFatura") {
+        fecharModalImportacao();
+      }
+
+    });
+
   });
 
   /* ==========================================
@@ -285,6 +307,19 @@ function preencherFiltroCartoes() {
   ) {
     select.value = valorAnterior;
   }
+
+    /* ==========================================
+     HABILITAR IMPORTAÇÃO
+  ========================================== */
+
+  const btnImportar = document.getElementById(
+    "btnImportarFatura"
+  );
+
+  btnImportar.disabled =
+    !cartoesCarregados ||
+    !cartoesCadastrados.length;
+
 }
 
 /* ==========================================
@@ -555,5 +590,84 @@ async function confirmarExclusaoCartao() {
 
   }
 }
+
+/* ==========================================
+   MODAL IMPORTAÇÃO DE FATURAS
+========================================== */
+
+function abrirModalImportacao() {
+
+  const modal = document.getElementById(
+    "modalImportarFatura"
+  );
+
+  const select = document.getElementById(
+    "importarCartao"
+  );
+
+  const filtroCartao = document.getElementById(
+    "filtroCartao"
+  );
+
+  document.getElementById(
+    "formImportarFatura"
+  ).reset();
+
+  document.getElementById(
+    "resumoImportacao"
+  ).hidden = true;
+
+  document.getElementById(
+    "btnConfirmarImportacao"
+  ).disabled = true;
+
+  document.getElementById(
+    "listaPreviaFatura"
+  ).replaceChildren();
+
+  select.replaceChildren();
+
+  const inicial = document.createElement("option");
+  inicial.value = "";
+  inicial.textContent = "Selecione um cartão";
+
+  select.appendChild(inicial);
+
+  cartoesCadastrados.forEach(cartao => {
+
+    const option = document.createElement("option");
+
+    option.value = cartao.id_cartao;
+
+    option.textContent =
+      cartao.banco + " - " +
+      cartao.nome_cartao + " (" +
+      cartao.final_cartao + ")";
+
+    select.appendChild(option);
+
+  });
+
+  if (filtroCartao.value) {
+    select.value = filtroCartao.value;
+  }
+
+  document.getElementById(
+    "importarAno"
+  ).value = new Date().getFullYear();
+
+  modal.hidden = false;
+
+}
+
+
+function fecharModalImportacao() {
+
+  document.getElementById(
+    "modalImportarFatura"
+  ).hidden = true;
+
+}
+
 
 
