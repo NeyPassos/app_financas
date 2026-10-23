@@ -1041,6 +1041,21 @@ async function lerPDFFaturaNubank(arquivo) {
 
   const textoGeral = paginas.flat().join("\n");
 
+  /* ==========================================
+    DIAGNÓSTICO DOS VALORES DO PDF
+  ========================================== */
+
+  const linhasValores = textoGeral
+    .split("\n")
+    .filter(linha =>
+      /total|pagar|fatura|1\.736,94|2\.120,98/i.test(linha)
+    );
+
+  console.log(
+    "LINHAS DE VALORES DO PDF:",
+    linhasValores
+  );
+
   const meses = {
     JAN: 1, FEV: 2, MAR: 3, ABR: 4,
     MAI: 5, JUN: 6, JUL: 7, AGO: 8,
@@ -1070,6 +1085,7 @@ async function lerPDFFaturaNubank(arquivo) {
     /Total a pagar\s+R\$\s*([\d.,]+)/i
   );
 
+  
   const valorOficial = resumo
     ? converterValorFatura(resumo[1])
     : null;
