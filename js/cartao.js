@@ -1081,14 +1081,44 @@ async function lerPDFFaturaNubank(arquivo) {
     String(mes).padStart(2, "0") + "-" +
     String(diaVencimento).padStart(2, "0");
 
-  const resumo = textoGeral.match(
-    /Total a pagar\s+R\$\s*([\d.,]+)/i
-  );
-
   
-  const valorOficial = resumo
-    ? converterValorFatura(resumo[1])
-    : null;
+    /* ==========================================
+      IDENTIFICAR VALOR OFICIAL DA FATURA
+    ========================================== */
+
+    // Procurar o total na seção RESUMO DA FATURA ATUAL.
+    // Isso evita capturar valores de simulações
+    // de pagamento ou parcelamento.
+
+    const resumoOficial = textoGeral.match(
+      /RESUMO DA FATURA ATUAL[\s\S]*?Total a pagar\s+R\$\s*([\d.,]+)/i
+    );
+
+    if (!resumoOficial) {
+      throw new Error(
+        "Não foi possível identificar o valor oficial " +
+        "no resumo da fatura Nubank."
+      );
+    }
+
+    const valorOficial = converterValorFatura(
+      resumoOficial[1]
+    );
+
+    if (
+      !Number.isFinite(valorOficial) ||
+      valorOficial < 0
+    ) {
+      throw new Error(
+        "Valor oficial da fatura inválido."
+      );
+    }
+
+    console.log(
+      "Valor oficial identificado:",
+      valorOficial
+    );
+
 
   const paginaTransacoes = paginas.find(pagina =>
     pagina.some(linha => /^TRANSAÇÕES\b/i.test(linha))
