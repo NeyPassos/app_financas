@@ -11,6 +11,7 @@ let arquivoImportacao = null;
 let importandoFatura = false;
 let faturasCadastradas = [];
 let faturasCarregadas = false;
+let dadosOficiaisImportacao = null;
 
 /* ==========================================
    INICIALIZAÇÃO
@@ -728,6 +729,8 @@ function abrirModalImportacao() {
 
 function fecharModalImportacao() {
 
+  dadosOficiaisImportacao = null;
+
   document.getElementById(
     "modalImportarFatura"
   ).hidden = true;
@@ -740,6 +743,8 @@ function fecharModalImportacao() {
 ========================================== */
 
 async function analisarArquivoFatura(evento) {
+
+  dadosOficiaisImportacao = null;
 
   evento?.preventDefault();
 
@@ -794,6 +799,11 @@ async function analisarArquivoFatura(evento) {
     } else {
 
       const resultadoPDF = await lerPDFFaturaNubank(arquivo);
+
+      dadosOficiaisImportacao = {
+      vencimento: resultadoPDF.vencimento,
+      valor_oficial: resultadoPDF.valorOficial
+    };
 
       if (resultadoPDF.mes !== mes || resultadoPDF.ano !== ano) {
         throw new Error(
@@ -1469,16 +1479,29 @@ async function confirmarImportacaoFatura() {
     return;
   }
 
-  const dados = {
-    id_cartao: idCartao,
-    mes: mes,
-    ano: ano,
-    arquivo_origem: arquivoImportacao.name,
-    origem: arquivoImportacao.name.toLowerCase().endsWith(".pdf")
-  ? "PDF"
-  : "CSV",
-    lancamentos: lancamentosImportacao
-  };
+  
+const dados = {
+  id_cartao: idCartao,
+  mes: mes,
+  ano: ano,
+
+  arquivo_origem: arquivoImportacao.name,
+
+  origem: arquivoImportacao.name
+    .toLowerCase()
+    .endsWith(".pdf")
+      ? "PDF"
+      : "CSV",
+
+  vencimento:
+    dadosOficiaisImportacao?.vencimento || "",
+
+  valor_oficial:
+    dadosOficiaisImportacao?.valor_oficial ?? null,
+
+  lancamentos: lancamentosImportacao
+};
+
 
   try {
 
@@ -1710,7 +1733,14 @@ function exibirFaturas() {
       nomeCartao,
       referencia,
       fatura.vencimento || "-",
-      formatarValorFatura(fatura.valor_total, moeda),
+      formatarValorFatura(
+      fatura.valor_oficial !== "" &&
+      fatura.valor_oficial !== null &&
+      fatura.valor_oficial !== undefined
+        ? fatura.valor_oficial
+        : fatura.valor_total,
+      moeda
+    ),
       fatura.situacao || "-"
     ];
 
