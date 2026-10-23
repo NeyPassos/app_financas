@@ -101,3 +101,35 @@ async function apiEditarConta(dados) {
 async function apiExcluirConta(id) {
   return executarAPI("excluirConta", [id]);
 }
+
+
+/* ==========================================
+   APP FINANÇAS - API DE CARTÕES
+========================================== */
+
+async function apiListarCartoes() {
+  return executarAPI("listarCartoes");
+}
+
+async function apiCadastrarCartao(dados) {
+  return executarAPI("cadastrarCartao", [dados]);
+}
+
+async function apiListarFaturas() {
+  return executarAPI("listarFaturas");
+}
+
+async function apiListarLancamentosCartao(idFatura) {
+  return executarAPI(
+    "listarLancamentosCartao",
+    [idFatura]
+  );
+}
+
+async function apiImportarLancamentosCartao(dados) {
+  return executarAPI(
+    "importarLancamentosCartao",
+    [dados]
+  );
+}
+

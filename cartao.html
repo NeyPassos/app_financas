@@ -1,1 +1,283 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cartões | App Finanças</title><link rel="stylesheet" href="css/style.css"></head><body><header><h1>App Finanças</h1><nav><a href="index.html">Dashboard</a><a href="contas.html">Contas</a><a href="cartao.html">Cartões</a></nav></header><main><h2>Cartões de crédito</h2><p>Cadastro e faturas serão adicionados posteriormente.</p></main></body></html>
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Cartões de Crédito | App Finanças</title>
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/cartao.css">
+</head>
+
+<body>
+
+  <!-- CABEÇALHO -->
+  <header>
+    <div class="container cabecalho-cartoes">
+      <div>
+        <h1>App Finanças</h1>
+        <p>Cartões de crédito</p>
+      </div>
+
+      <div class="acoes-cabecalho">
+        
+        <button type="button"
+                id="btnLogin"
+                onclick="entrarGoogle()">
+          Entrar com Google
+        </button>
+
+        <button type="button"
+                id="btnVoltar"
+                onclick="window.location.href='contas.html'">
+          Voltar
+        </button>
+
+        <button type="button"
+                id="btnSair"
+                hidden>
+          Sair
+        </button>
+
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <p id="status" role="status"></p>
+
+    <!-- CADASTRO DE CARTÕES -->
+    <section class="painel-cartoes">
+
+      <div class="titulo-secao">
+        <h2>Meus cartões</h2>
+
+        <button type="button"
+                id="btnNovoCartao"
+                class="btn-primario">
+          + Novo cartão
+        </button>
+      </div>
+
+      <div class="tabela-responsiva">
+        <table id="tabelaCartoes">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Banco</th>
+              <th>Cartão</th>
+              <th>Final</th>
+              <th>Fechamento</th>
+              <th>Vencimento</th>
+              <th>Situação</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+
+          <tbody id="listaCartoes">
+            <tr>
+              <td colspan="8">
+                Carregando cartões...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+    <!-- FATURAS -->
+    <section class="painel-cartoes">
+
+      <div class="titulo-secao">
+        <h2>Faturas</h2>
+
+        <button type="button"
+                id="btnImportarFatura"
+                class="btn-primario"
+                disabled>
+          Importar PDF / CSV
+        </button>
+      </div>
+
+      <div class="filtros-faturas">
+
+        <div>
+          <label for="filtroCartao">Cartão</label>
+          <select id="filtroCartao">
+            <option value="">
+              Selecione um cartão
+            </option>
+          </select>
+        </div>
+
+        <div>
+          <label for="filtroMes">Mês</label>
+          <select id="filtroMes">
+            <option value="">Todos</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="filtroAno">Ano</label>
+          <select id="filtroAno">
+            <option value="">Todos</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="tabela-responsiva">
+        <table id="tabelaFaturas">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Cartão</th>
+              <th>Referência</th>
+              <th>Vencimento</th>
+              <th>Valor</th>
+              <th>Situação</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+
+          <tbody id="listaFaturas">
+            <tr>
+              <td colspan="7">
+                Selecione um cartão para consultar.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- MODAL CADASTRO / EDIÇÃO -->
+  <div id="modalCartao"
+       class="modal-cartao"
+       hidden>
+
+    <div class="modal-cartao-conteudo"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="tituloModalCartao">
+
+      <div class="modal-cartao-cabecalho">
+        <h2 id="tituloModalCartao">
+          Novo cartão
+        </h2>
+
+        <button type="button"
+                id="btnFecharModalCartao">
+          Fechar
+        </button>
+      </div>
+
+      <form id="formCartao">
+
+        <input type="hidden" id="idCartao">
+
+        <div class="campo">
+          <label for="banco">Banco</label>
+          <input type="text"
+                 id="banco"
+                 maxlength="100"
+                 required>
+        </div>
+
+        <div class="campo">
+          <label for="nomeCartao">
+            Nome do cartão
+          </label>
+          <input type="text"
+                 id="nomeCartao"
+                 maxlength="100"
+                 required>
+        </div>
+
+        <div class="campo">
+          <label for="finalCartao">
+            Últimos 4 dígitos
+          </label>
+          <input type="text"
+                 id="finalCartao"
+                 maxlength="4"
+                 pattern="[0-9]{4}"
+                 inputmode="numeric"
+                 required>
+        </div>
+
+        <div class="campos-lado-a-lado">
+
+          <div class="campo">
+            <label for="diaFechamento">
+              Dia do fechamento
+            </label>
+            <input type="number"
+                   id="diaFechamento"
+                   min="1"
+                   max="31"
+                   required>
+          </div>
+
+          <div class="campo">
+            <label for="diaVencimento">
+              Dia do vencimento
+            </label>
+            <input type="number"
+                   id="diaVencimento"
+                   min="1"
+                   max="31"
+                   required>
+          </div>
+
+        </div>
+
+        <div class="campo">
+          <label for="cartaoAtivo">
+            Situação
+          </label>
+
+          <select id="cartaoAtivo">
+            <option value="Sim">Ativo</option>
+            <option value="Não">Inativo</option>
+          </select>
+        </div>
+
+        <div class="modal-cartao-acoes">
+          <button type="button"
+                  id="btnCancelarCartao">
+            Cancelar
+          </button>
+
+          <button type="submit"
+                  class="btn-primario"
+                  id="btnSalvarCartao">
+            Salvar
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="https://accounts.google.com/gsi/client"
+        defer></script>
+
+  <script src="js/config.js"defer></script>
+  <script src="js/auth.js"defer></script>
+  <script src="js/api.js"defer></script>
+  <script src="js/cartao.js"></script>
+
+</body>
+</html>

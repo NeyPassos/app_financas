@@ -1,0 +1,167 @@
+
+/* ==========================================
+   APP FINANÇAS - CARTÕES DE CRÉDITO
+========================================== */
+
+.cabecalho-cartoes,
+.acoes-cabecalho,
+.titulo-secao,
+.modal-cartao-cabecalho,
+.modal-cartao-acoes {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.acoes-cabecalho {
+  justify-content: flex-end;
+}
+
+.painel-cartoes {
+  background: #fff;
+  border: 1px solid #dce4ef;
+  border-radius: 10px;
+  padding: 22px;
+  margin: 20px 0;
+  box-shadow: 0 3px 10px rgba(0,0,0,.04);
+}
+
+.titulo-secao {
+  margin-bottom: 22px;
+}
+
+.titulo-secao h2 {
+  margin: 0;
+}
+
+.btn-primario {
+  background: #2463a6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 11px 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-primario:hover {
+  background: #174c85;
+}
+
+button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.tabela-responsiva {
+  overflow-x: auto;
+}
+
+.painel-cartoes table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.painel-cartoes th,
+.painel-cartoes td {
+  padding: 13px 10px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.painel-cartoes th {
+  background: #edf2f8;
+  color: #244469;
+}
+
+.filtros-faturas {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.filtros-faturas label,
+.campo label {
+  display: block;
+  margin-bottom: 7px;
+  font-weight: bold;
+}
+
+.filtros-faturas select,
+.campo input,
+.campo select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.modal-cartao[hidden] {
+  display: none !important;
+}
+
+.modal-cartao {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0,0,0,.55);
+  padding: 20px;
+}
+
+.modal-cartao-conteudo {
+  background: white;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.modal-cartao-cabecalho {
+  margin-bottom: 20px;
+}
+
+.campo {
+  margin-bottom: 16px;
+}
+
+.campos-lado-a-lado {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.modal-cartao-acoes {
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+@media (max-width: 650px) {
+  .filtros-faturas,
+  .campos-lado-a-lado {
+    grid-template-columns: 1fr;
+  }
+
+  .cabecalho-cartoes,
+  .titulo-secao {
+    flex-wrap: wrap;
+  }
+}
+
+
+/* ==========================================
+   CONTROLE DE EXIBIÇÃO DO MODAL
+========================================== */
+
+.modal-cartao[hidden] {
+    display: none !important;
+}
+
