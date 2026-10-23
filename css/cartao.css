@@ -462,3 +462,151 @@ button:focus-visible {
         width: 100%;
     }
 }
+
+
+/* ==========================================
+   MODAL CONSULTAR FATURA
+========================================== */
+
+/* Aumentar largura e altura do modal */
+#modalConsultarFatura .modal-consulta-fatura {
+    width: 95%;
+    max-width: 1050px;
+    max-height: 90vh;
+
+    padding: 28px 32px;
+
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+/* Cabeçalho */
+#modalConsultarFatura .modal-cartao-cabecalho {
+    margin-bottom: 24px;
+    padding-bottom: 14px;
+
+    border-bottom: 1px solid #e2e8f0;
+}
+
+/* Informações do cartão e referência */
+#informacoesConsultaFatura {
+    margin: 0 0 22px;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+/* Área da tabela */
+#modalConsultarFatura .tabela-responsiva {
+    width: 100%;
+    overflow-x: auto;
+}
+
+/* Tabela de lançamentos */
+#modalConsultarFatura table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+/* Cabeçalho da tabela */
+#modalConsultarFatura th {
+    padding: 14px 12px;
+    text-align: left;
+
+    background: #eaf0f6;
+    color: #102a50;
+
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* Células dos lançamentos */
+#modalConsultarFatura td {
+    padding: 13px 12px;
+
+    font-size: 14px;
+    line-height: 1.5;
+
+    vertical-align: middle;
+
+    border-bottom: 1px solid #e5eaf0;
+}
+
+/* Espaçamento alternado entre linhas */
+#modalConsultarFatura tbody tr:nth-child(even) {
+    background: #f8fafc;
+}
+
+/* Larguras das colunas */
+#modalConsultarFatura th:nth-child(1),
+#modalConsultarFatura td:nth-child(1) {
+    width: 13%;
+    white-space: nowrap;
+}
+
+#modalConsultarFatura th:nth-child(2),
+#modalConsultarFatura td:nth-child(2) {
+    width: 43%;
+    overflow-wrap: anywhere;
+}
+
+#modalConsultarFatura th:nth-child(3),
+#modalConsultarFatura td:nth-child(3) {
+    width: 12%;
+    text-align: center;
+    white-space: nowrap;
+}
+
+#modalConsultarFatura th:nth-child(4),
+#modalConsultarFatura td:nth-child(4) {
+    width: 17%;
+    text-align: right;
+    white-space: nowrap;
+}
+
+#modalConsultarFatura th:nth-child(5),
+#modalConsultarFatura td:nth-child(5) {
+    width: 15%;
+    text-align: center;
+}
+
+/* Total da fatura */
+#totalConsultaFatura {
+    margin-top: 22px;
+    padding: 16px;
+
+    background: #f1f5f9;
+    border-radius: 6px;
+
+    font-size: 15px;
+    font-weight: 700;
+    text-align: right;
+}
+
+/* Botão fechar no rodapé */
+#modalConsultarFatura .modal-cartao-acoes {
+    margin-top: 22px;
+    padding-top: 18px;
+
+    border-top: 1px solid #e2e8f0;
+}
+
+/* Ajustes para telas menores */
+@media (max-width: 768px) {
+
+    #modalConsultarFatura .modal-consulta-fatura {
+        width: 96%;
+        padding: 18px;
+        max-height: 92vh;
+    }
+
+    #modalConsultarFatura table {
+        min-width: 760px;
+    }
+
+    #modalConsultarFatura th,
+    #modalConsultarFatura td {
+        padding: 10px 8px;
+        font-size: 13px;
+    }
+}
