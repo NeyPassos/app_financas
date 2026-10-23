@@ -133,3 +133,15 @@ async function apiImportarLancamentosCartao(dados) {
   );
 }
 
+/* ==========================================
+   EXCLUIR CARTÃO
+========================================== */
+
+async function apiExcluirCartao(idCartao) {
+
+  return executarAPI(
+    "excluirCartao",
+    [idCartao]
+  );
+
+}

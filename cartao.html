@@ -10,7 +10,7 @@
   <title>Cartões de Crédito | App Finanças</title>
 
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/cartao.css?v=1">
+  <link rel="stylesheet" href="css/cartao.css?v=2">
 </head>
 
 <body>
@@ -269,6 +269,49 @@
 
     </div>
   </div>
+
+  <!-- MODAL DE EXCLUSÃO DE CARTÃO -->
+  <div id="modalExcluirCartao"
+      class="modal-cartao"
+      hidden>
+
+    <div class="modal-cartao-conteudo"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="tituloExcluirCartao">
+
+      <div class="modal-cartao-cabecalho">
+        <h2 id="tituloExcluirCartao">
+          Excluir cartão
+        </h2>
+      </div>
+
+      <p>
+        Deseja realmente excluir o cartão
+        <strong id="nomeCartaoExcluir"></strong>?
+      </p>
+
+      <p>
+        Esta ação não poderá ser desfeita.
+      </p>
+
+      <div class="modal-cartao-acoes">
+
+        <button type="button"
+                id="btnCancelarExclusao">
+          Cancelar
+        </button>
+
+        <button type="button"
+                id="btnConfirmarExclusao"
+                class="btn-excluir">
+          Excluir
+        </button>
+
+      </div>
+
+  </div>
+</div>
 
   <!-- SCRIPTS -->
   <script src="https://accounts.google.com/gsi/client"

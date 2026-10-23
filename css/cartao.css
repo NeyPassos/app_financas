@@ -295,3 +295,59 @@ button:focus-visible {
     background: #234d87;
 }
 
+/* ==========================================
+   BOTÃO EXCLUIR
+========================================== */
+
+.btn-excluir {
+    background: #fde7e9;
+    color: #c62828;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-excluir:hover {
+    background: #f8cdd2;
+}
+
+/* ==========================================
+   MODAL DE EXCLUSÃO
+========================================== */
+
+#modalExcluirCartao:not([hidden]) {
+    display: flex;
+}
+
+#modalExcluirCartao[hidden] {
+    display: none !important;
+}
+
+#modalExcluirCartao {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    background: rgba(0, 0, 0, 0.55);
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+#modalExcluirCartao .modal-cartao-conteudo {
+    width: 100%;
+    max-width: 450px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.2);
+}
+
+#modalExcluirCartao .modal-cartao-acoes {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 25px;
+}

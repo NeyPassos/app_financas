@@ -92,13 +92,35 @@ function configurarEventosCartao() {
 
     });
 
-  document.addEventListener("keydown", evento => {
+    document.addEventListener("keydown", evento => {
 
     if (evento.key === "Escape") {
+
       fecharModalCartao();
+      fecharExcluirCartao();
+
     }
 
   });
+
+  /* ==========================================
+     EVENTOS DE EXCLUSÃO
+  ========================================== */
+
+  document.getElementById("btnCancelarExclusao")
+    .addEventListener("click", fecharExcluirCartao);
+
+  document.getElementById("btnConfirmarExclusao")
+    .addEventListener("click", confirmarExclusaoCartao);
+
+  document.getElementById("modalExcluirCartao")
+    .addEventListener("click", evento => {
+
+      if (evento.target.id === "modalExcluirCartao") {
+        fecharExcluirCartao();
+      }
+
+    });
 }
 
 /* ==========================================
@@ -205,10 +227,24 @@ function exibirCartoes() {
       abrirEditarCartao(cartao.id_cartao);
     });
 
-    acoes.appendChild(btnEditar);
+        acoes.appendChild(btnEditar);
+
+    // BOTÃO EXCLUIR
+    const btnExcluir = document.createElement("button");
+
+    btnExcluir.type = "button";
+    btnExcluir.textContent = "Excluir";
+    btnExcluir.className = "btn-excluir";
+
+    btnExcluir.addEventListener("click", () => {
+      abrirExcluirCartao(cartao.id_cartao);
+    });
+
+    acoes.appendChild(btnExcluir);
+
   });
 }
-
+ 
 /* ==========================================
    FILTRO DE CARTÕES
 ========================================== */
@@ -410,4 +446,114 @@ async function salvarCartao(evento) {
 
   }
 }
+
+/* ==========================================
+   EXCLUSÃO DE CARTÕES
+========================================== */
+
+let idCartaoExcluir = null;
+let excluindoCartao = false;
+
+
+/* ==========================================
+   ABRIR MODAL DE EXCLUSÃO
+========================================== */
+
+function abrirExcluirCartao(id) {
+
+  const cartao = cartoesCadastrados.find(
+    item => String(item.id_cartao) === String(id)
+  );
+
+  if (!cartao) {
+    mostrarStatus("Cartão não encontrado.");
+    return;
+  }
+
+  idCartaoExcluir = cartao.id_cartao;
+
+  document.getElementById("nomeCartaoExcluir")
+    .textContent =
+      cartao.banco + " - " + cartao.nome_cartao;
+
+  document.getElementById("modalExcluirCartao")
+    .hidden = false;
+
+}
+
+
+/* ==========================================
+   FECHAR MODAL DE EXCLUSÃO
+========================================== */
+
+function fecharExcluirCartao() {
+
+  if (excluindoCartao) return;
+
+  document.getElementById("modalExcluirCartao")
+    .hidden = true;
+
+  idCartaoExcluir = null;
+
+}
+
+
+/* ==========================================
+   CONFIRMAR EXCLUSÃO
+========================================== */
+
+async function confirmarExclusaoCartao() {
+
+  if (!idCartaoExcluir || excluindoCartao) {
+    return;
+  }
+
+  const botao = document.getElementById(
+    "btnConfirmarExclusao"
+  );
+
+  try {
+
+    excluindoCartao = true;
+
+    botao.disabled = true;
+    botao.textContent = "Excluindo...";
+
+    const resposta = await apiExcluirCartao(
+      idCartaoExcluir
+    );
+
+    mostrarStatus(
+      resposta.mensagem ||
+      "Cartão excluído com sucesso."
+    );
+
+    document.getElementById("modalExcluirCartao")
+      .hidden = true;
+
+    idCartaoExcluir = null;
+
+    await carregarCartoes();
+
+  } catch (erro) {
+
+    console.error(
+      "Erro ao excluir cartão:",
+      erro
+    );
+
+    mostrarStatus(
+      "Erro ao excluir cartão: " + erro.message
+    );
+
+  } finally {
+
+    excluindoCartao = false;
+
+    botao.disabled = false;
+    botao.textContent = "Excluir";
+
+  }
+}
+
 
