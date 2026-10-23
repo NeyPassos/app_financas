@@ -736,7 +736,7 @@ function fecharModalImportacao() {
 
 
 /* ==========================================
-   ANALISAR ARQUIVO DA FATURA
+   ANALISAR FATURA CSV OU PDF
 ========================================== */
 
 async function analisarArquivoFatura(evento) {
@@ -746,22 +746,14 @@ async function analisarArquivoFatura(evento) {
   const idCartao = document.getElementById("importarCartao").value;
   const mes = Number(document.getElementById("importarMes").value);
   const ano = Number(document.getElementById("importarAno").value);
-  const inputArquivo = document.getElementById("arquivoFatura");
-  const arquivo = inputArquivo?.files[0];
+  const arquivo = document.getElementById("arquivoFatura")?.files[0];
 
-  const btnConfirmar = document.getElementById(
-    "btnConfirmarImportacao"
-  );
-
-  const btnAnalisar = document.getElementById(
-    "btnAnalisarFatura"
-  );
+  const btnConfirmar = document.getElementById("btnConfirmarImportacao");
+  const btnAnalisar = document.getElementById("btnAnalisarFatura");
 
   lancamentosImportacao = [];
   arquivoImportacao = null;
-
   btnConfirmar.disabled = true;
-
   document.getElementById("resumoImportacao").hidden = true;
 
   if (!idCartao) {
@@ -771,19 +763,19 @@ async function analisarArquivoFatura(evento) {
 
   if (!Number.isInteger(mes) || mes < 1 || mes > 12 ||
       !Number.isInteger(ano) || ano < 1900 || ano > 9999) {
-    mostrarStatus("Informe o mês e ano da fatura.");
+    mostrarStatus("Informe mês e ano válidos.");
     return;
   }
 
   if (!arquivo) {
-    mostrarStatus("Selecione o arquivo da fatura.");
+    mostrarStatus("Selecione um arquivo CSV ou PDF.");
     return;
   }
 
-  if (!arquivo.name.toLowerCase().endsWith(".csv")) {
-    mostrarStatus(
-      "Nesta etapa, selecione um arquivo CSV. PDF será implementado depois."
-    );
+  const extensao = arquivo.name.split(".").pop().toLowerCase();
+
+  if (!["csv", "pdf"].includes(extensao)) {
+    mostrarStatus("Formato não permitido. Utilize CSV ou PDF.");
     return;
   }
 
@@ -792,12 +784,38 @@ async function analisarArquivoFatura(evento) {
     btnAnalisar.disabled = true;
     btnAnalisar.textContent = "Analisando...";
 
-    const conteudo = await arquivo.text();
+    let registros;
 
-    const registros = lerCSVFatura(conteudo);
+    if (extensao === "csv") {
+
+      const conteudo = await arquivo.text();
+      registros = lerCSVFatura(conteudo);
+
+    } else {
+
+      const resultadoPDF = await lerPDFFaturaNubank(arquivo);
+
+      if (resultadoPDF.mes !== mes || resultadoPDF.ano !== ano) {
+        throw new Error(
+          "O PDF pertence à fatura " +
+          String(resultadoPDF.mes).padStart(2, "0") +
+          "/" + resultadoPDF.ano +
+          ". Corrija o mês e ano selecionados."
+        );
+      }
+
+      registros = resultadoPDF.lancamentos;
+
+      console.log("Resumo do PDF:", {
+        vencimento: resultadoPDF.vencimento,
+        valorOficial: resultadoPDF.valorOficial,
+        movimentos: registros.length
+      });
+
+    }
 
     if (!registros.length) {
-      throw new Error("O CSV não possui lançamentos.");
+      throw new Error("Nenhum lançamento encontrado.");
     }
 
     lancamentosImportacao = registros;
@@ -808,12 +826,14 @@ async function analisarArquivoFatura(evento) {
     btnConfirmar.disabled = false;
 
     mostrarStatus(
-      registros.length + " lançamento(s) identificado(s)."
+      registros.length +
+      " lançamento(s) identificado(s) no " +
+      extensao.toUpperCase() + "."
     );
 
   } catch (erro) {
 
-    console.error("Erro na análise:", erro);
+    console.error("Erro ao analisar fatura:", erro);
     mostrarStatus("Erro ao analisar arquivo: " + erro.message);
 
   } finally {
@@ -823,6 +843,7 @@ async function analisarArquivoFatura(evento) {
 
   }
 }
+
 
 /* ==========================================
    LEITURA CSV COM ASPAS E VÍRGULAS
@@ -917,6 +938,261 @@ function converterValorFatura(valor) {
 
   return numero;
 }
+
+
+/* ==========================================
+   EXTRAIR LINHAS DE TEXTO DO PDF
+========================================== */
+
+async function extrairLinhasPDF(arquivo) {
+
+  if (!window.pdfjsLib) {
+    throw new Error(
+      "PDF.js não carregado. Verifique o script no cartao.html."
+    );
+  }
+
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+  const bytes = new Uint8Array(await arquivo.arrayBuffer());
+
+  const documento = await pdfjsLib.getDocument({
+    data: bytes
+  }).promise;
+
+  const paginas = [];
+
+  try {
+
+    for (let numero = 1; numero <= documento.numPages; numero++) {
+
+      const pagina = await documento.getPage(numero);
+      const conteudo = await pagina.getTextContent();
+
+      const itens = conteudo.items
+        .filter(item => item.str && item.str.trim())
+        .map(item => ({
+          texto: item.str.trim(),
+          x: item.transform[4],
+          y: item.transform[5]
+        }))
+        .sort((a, b) => b.y - a.y || a.x - b.x);
+
+      const linhas = [];
+
+      for (const item of itens) {
+
+        // Agrupa textos que estão na mesma altura da página.
+        let linha = linhas.find(
+          atual => Math.abs(atual.y - item.y) <= 2.5
+        );
+
+        if (!linha) {
+          linha = { y: item.y, itens: [] };
+          linhas.push(linha);
+        }
+
+        linha.itens.push(item);
+      }
+
+      paginas.push(
+        linhas
+          .sort((a, b) => b.y - a.y)
+          .map(linha =>
+            linha.itens
+              .sort((a, b) => a.x - b.x)
+              .map(item => item.texto)
+              .join(" ")
+              .replace(/\s+/g, " ")
+              .trim()
+          )
+      );
+
+    }
+
+    return paginas;
+
+  } finally {
+
+    await documento.destroy();
+
+  }
+}
+
+
+/* ==========================================
+   LER PDF DE FATURA NUBANK
+========================================== */
+
+async function lerPDFFaturaNubank(arquivo) {
+
+  const paginas = await extrairLinhasPDF(arquivo);
+
+  const textoGeral = paginas.flat().join("\n");
+
+  const meses = {
+    JAN: 1, FEV: 2, MAR: 3, ABR: 4,
+    MAI: 5, JUN: 6, JUL: 7, AGO: 8,
+    SET: 9, OUT: 10, NOV: 11, DEZ: 12
+  };
+
+  const cabecalho = textoGeral.match(
+    /FATURA\s+(\d{1,2})\s+(JAN|FEV|MAR|ABR|MAI|JUN|JUL|AGO|SET|OUT|NOV|DEZ)\s+(\d{4})/i
+  );
+
+  if (!cabecalho) {
+    throw new Error(
+      "Não foi possível identificar a referência da fatura Nubank."
+    );
+  }
+
+  const diaVencimento = Number(cabecalho[1]);
+  const mes = meses[cabecalho[2].toUpperCase()];
+  const ano = Number(cabecalho[3]);
+
+  const vencimento =
+    ano + "-" +
+    String(mes).padStart(2, "0") + "-" +
+    String(diaVencimento).padStart(2, "0");
+
+  const resumo = textoGeral.match(
+    /Total a pagar\s+R\$\s*([\d.,]+)/i
+  );
+
+  const valorOficial = resumo
+    ? converterValorFatura(resumo[1])
+    : null;
+
+  const paginaTransacoes = paginas.find(pagina =>
+    pagina.some(linha => /^TRANSAÇÕES\b/i.test(linha))
+  );
+
+  if (!paginaTransacoes) {
+    throw new Error(
+      "A seção TRANSAÇÕES não foi encontrada no PDF."
+    );
+  }
+
+  const lancamentos = [];
+
+  let naSecaoTransacoes = false;
+  let naSecaoPagamentos = false;
+
+  const padraoTransacao =
+    /^(\d{1,2})\s+(JAN|FEV|MAR|ABR|MAI|JUN|JUL|AGO|SET|OUT|NOV|DEZ)\s+(?:(?:[•*·]{2,4})\s*\d{4}\s+)?(.+?)\s+([−-]?\s*R\$\s*[\d.,]+)$/i;
+
+  for (const linhaOriginal of paginaTransacoes) {
+
+    const linha = linhaOriginal
+      .replace(/\u00a0/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (/^TRANSAÇÕES\b/i.test(linha)) {
+      naSecaoTransacoes = true;
+      continue;
+    }
+
+    if (!naSecaoTransacoes) continue;
+
+    if (/^Pagamentos\b/i.test(linha)) {
+      naSecaoPagamentos = true;
+      continue;
+    }
+
+    if (/^Em cumprimento/i.test(linha)) {
+      break;
+    }
+
+    const resultado = linha.match(padraoTransacao);
+
+    if (!resultado) continue;
+
+    const diaCompra = Number(resultado[1]);
+    const mesCompra = meses[resultado[2].toUpperCase()];
+    const descricao = resultado[3].trim();
+
+    const valorTexto = resultado[4]
+      .replace(/\s/g, "")
+      .replace("R$", "")
+      .replace("−", "-");
+
+    const valor = converterValorFatura(valorTexto);
+
+    // Compras podem pertencer ao ano anterior à referência.
+    let anoCompra = ano;
+
+    if (mesCompra > mes) {
+      anoCompra--;
+    }
+
+    const dataValidada = new Date(
+      Date.UTC(anoCompra, mesCompra - 1, diaCompra)
+    );
+
+    if (
+      dataValidada.getUTCFullYear() !== anoCompra ||
+      dataValidada.getUTCMonth() !== mesCompra - 1 ||
+      dataValidada.getUTCDate() !== diaCompra
+    ) {
+      throw new Error("Data inválida no PDF: " + linha);
+    }
+
+    const dataCompra =
+      anoCompra + "-" +
+      String(mesCompra).padStart(2, "0") + "-" +
+      String(diaCompra).padStart(2, "0");
+
+    const parcela = descricao.match(
+      /parcela\s+(\d+)\s*\/\s*(\d+)/i
+    );
+
+    const parcelaAtual = parcela ? Number(parcela[1]) : 1;
+    const totalParcelas = parcela ? Number(parcela[2]) : 1;
+
+    if (
+      parcelaAtual < 1 ||
+      totalParcelas < parcelaAtual
+    ) {
+      throw new Error("Parcelamento inválido: " + descricao);
+    }
+
+    const tipoMovimento =
+      naSecaoPagamentos || valor < 0
+        ? "Pagamento"
+        : /\bIOF\b|juros|multa/i.test(descricao)
+          ? "Encargo"
+          : "Compra";
+
+    lancamentos.push({
+      data_compra: dataCompra,
+      descricao,
+      parcela_atual: parcelaAtual,
+      total_parcelas: totalParcelas,
+      valor: tipoMovimento === "Pagamento"
+        ? -Math.abs(valor)
+        : valor,
+      tipo_movimento: tipoMovimento
+    });
+
+  }
+
+  if (!lancamentos.length) {
+    throw new Error(
+      "Nenhuma transação reconhecida. Verifique o formato do PDF."
+    );
+  }
+
+  return {
+    mes,
+    ano,
+    vencimento,
+    valorOficial,
+    lancamentos
+  };
+}
+
 
 /* ==========================================
    INTERPRETAR CSV DO NUBANK
@@ -1198,7 +1474,9 @@ async function confirmarImportacaoFatura() {
     mes: mes,
     ano: ano,
     arquivo_origem: arquivoImportacao.name,
-    origem: "CSV",
+    origem: arquivoImportacao.name.toLowerCase().endsWith(".pdf")
+  ? "PDF"
+  : "CSV",
     lancamentos: lancamentosImportacao
   };
 
