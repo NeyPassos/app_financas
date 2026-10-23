@@ -9,6 +9,8 @@ let salvandoCartao = false;
 let lancamentosImportacao = [];
 let arquivoImportacao = null;
 let importandoFatura = false;
+let faturasCadastradas = [];
+let faturasCarregadas = false;
 
 /* ==========================================
    INICIALIZAÇÃO
@@ -167,6 +169,17 @@ function configurarEventosCartao() {
     }
   });
 
+   /* ==========================================
+    FILTROS DAS FATURAS
+  ========================================== */
+
+  ["filtroCartao", "filtroMes", "filtroAno"].forEach(id => {
+
+    document.getElementById(id)
+      ?.addEventListener("change", exibirFaturas);
+
+  });
+
 }
   
 /* ==========================================
@@ -195,6 +208,8 @@ async function carregarCartoes() {
 
     exibirCartoes();
     preencherFiltroCartoes();
+
+    await carregarFaturas();
 
     mostrarStatus(
       cartoesCadastrados.length +
@@ -1252,3 +1267,209 @@ async function confirmarImportacaoFatura() {
   }
 }
 
+
+/* ==========================================
+   CARREGAR FATURAS
+========================================== */
+
+async function carregarFaturas() {
+
+  const lista = document.getElementById("listaFaturas");
+
+  lista.replaceChildren();
+
+  const linha = lista.insertRow();
+  const celula = linha.insertCell();
+
+  celula.colSpan = 7;
+  celula.textContent = "Carregando faturas...";
+
+  try {
+
+    const resposta = await apiListarFaturas();
+
+    faturasCadastradas = Array.isArray(resposta.dados)
+      ? resposta.dados
+      : [];
+
+    faturasCarregadas = true;
+
+    exibirFaturas();
+
+  } catch (erro) {
+
+    console.error("Erro ao carregar faturas:", erro);
+
+    faturasCarregadas = false;
+
+    lista.replaceChildren();
+
+    const linhaErro = lista.insertRow();
+    const celulaErro = linhaErro.insertCell();
+
+    celulaErro.colSpan = 7;
+    celulaErro.textContent =
+      "Erro ao carregar faturas: " + erro.message;
+
+    mostrarStatus(
+      "Erro ao carregar faturas: " + erro.message
+    );
+
+  }
+}
+
+
+/* ==========================================
+   EXIBIR FATURAS COM FILTROS
+========================================== */
+
+function exibirFaturas() {
+
+  const lista = document.getElementById("listaFaturas");
+
+  const idCartao = document.getElementById(
+    "filtroCartao"
+  ).value;
+
+  const mes = document.getElementById(
+    "filtroMes"
+  ).value;
+
+  const ano = document.getElementById(
+    "filtroAno"
+  ).value;
+
+  lista.replaceChildren();
+
+  if (!idCartao) {
+
+    const linha = lista.insertRow();
+    const celula = linha.insertCell();
+
+    celula.colSpan = 7;
+    celula.textContent =
+      "Selecione um cartão para consultar.";
+
+    return;
+  }
+
+  const faturasFiltradas = faturasCadastradas.filter(
+    fatura => {
+
+      return (
+        String(fatura.id_cartao) === String(idCartao) &&
+        (!mes || Number(fatura.mes) === Number(mes)) &&
+        (!ano || Number(fatura.ano) === Number(ano))
+      );
+
+    }
+  );
+
+  faturasFiltradas.sort((a, b) =>
+    Number(b.ano) - Number(a.ano) ||
+    Number(b.mes) - Number(a.mes)
+  );
+
+  if (!faturasFiltradas.length) {
+
+    const linha = lista.insertRow();
+    const celula = linha.insertCell();
+
+    celula.colSpan = 7;
+    celula.textContent =
+      "Nenhuma fatura encontrada.";
+
+    return;
+  }
+
+  const moeda = new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL"
+  });
+
+  faturasFiltradas.forEach(fatura => {
+
+    const cartao = cartoesCadastrados.find(
+      item =>
+        String(item.id_cartao) ===
+        String(fatura.id_cartao)
+    );
+
+    const nomeCartao = cartao
+      ? cartao.banco + " - " + cartao.nome_cartao
+      : "Cartão " + fatura.id_cartao;
+
+    const referencia =
+      String(fatura.mes).padStart(2, "0") +
+      "/" + fatura.ano;
+
+    const linha = lista.insertRow();
+
+    const valores = [
+      fatura.id_fatura,
+      nomeCartao,
+      referencia,
+      fatura.vencimento || "-",
+      formatarValorFatura(fatura.valor_total, moeda),
+      fatura.situacao || "-"
+    ];
+
+    valores.forEach(valor => {
+
+      const celula = linha.insertCell();
+      celula.textContent = valor;
+
+    });
+
+    const acoes = linha.insertCell();
+
+    const btnConsultar = document.createElement("button");
+
+    btnConsultar.type = "button";
+    btnConsultar.textContent = "Consultar";
+    btnConsultar.className = "btn-editar";
+
+    btnConsultar.addEventListener("click", () => {
+      consultarFatura(fatura.id_fatura);
+    });
+
+    acoes.appendChild(btnConsultar);
+
+  });
+}
+
+
+/* ==========================================
+   FORMATAR VALOR DA FATURA
+========================================== */
+
+function formatarValorFatura(valor, moeda) {
+
+  if (typeof valor === "number") {
+    return moeda.format(valor);
+  }
+
+  let texto = String(valor ?? "").trim()
+    .replace(/R\$\s?/g, "")
+    .replace(/\s/g, "");
+
+  if (texto.includes(",")) {
+    texto = texto.replace(/\./g, "").replace(",", ".");
+  }
+
+  const numero = Number(texto);
+
+  return Number.isFinite(numero)
+    ? moeda.format(numero)
+    : "-";
+}
+
+function consultarFatura(idFatura) {
+
+  mostrarStatus(
+    "Consulta da fatura " +
+    idFatura +
+    " será implementada na próxima etapa."
+  );
+
+}
