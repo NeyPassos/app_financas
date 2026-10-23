@@ -48,10 +48,21 @@ async function executarAPI(funcao, parametros = []) {
   }
 
   if (resultado.error) {
-    throw new Error(
+
+    const mensagem =
       resultado.error.message ||
-      "Erro ao executar a função."
-    );
+      "Erro ao executar a função.";
+
+    if (
+      mensagem.includes("Acesso negado") ||
+      mensagem.includes("Usuário não autorizado")
+    ) {
+      throw new Error(
+        "Acesso negado. Esta conta Google não possui autorização para utilizar o App Finanças."
+      );
+    }
+
+    throw new Error(mensagem);
   }
 
   const retorno = resultado.response?.result;
