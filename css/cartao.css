@@ -165,3 +165,133 @@ button:disabled {
     display: none !important;
 }
 
+
+/* ==========================================
+   PADRONIZAÇÃO DOS BOTÕES - APP FINANÇAS
+========================================== */
+
+button {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+
+    min-height: 36px;
+    padding: 9px 15px;
+
+    border: 1px solid transparent;
+    border-radius: 6px;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+/* BOTÕES PRINCIPAIS */
+
+.btn-primario,
+#btnNovoCartao,
+#btnSalvarCartao {
+    background: #2d5fa5;
+    color: #ffffff;
+    border-color: #2d5fa5;
+}
+
+.btn-primario:hover:not(:disabled),
+#btnNovoCartao:hover:not(:disabled),
+#btnSalvarCartao:hover:not(:disabled) {
+    background: #234d87;
+}
+
+/* BOTÕES EDITAR */
+
+.btn-editar {
+    background: #e5edf9;
+    color: #1854a1;
+    border-color: transparent;
+}
+
+.btn-editar:hover {
+    background: #d4e3f7;
+}
+
+/* BOTÕES EXCLUIR */
+
+.btn-excluir {
+    background: #fde7e9;
+    color: #b42332;
+    border-color: transparent;
+}
+
+.btn-excluir:hover {
+    background: #f9d4d8;
+}
+
+/* BOTÕES SECUNDÁRIOS */
+
+#btnVoltar,
+#btnSair,
+#btnLogin,
+#btnCancelarCartao,
+#btnFecharModalCartao {
+    background: #e8edf3;
+    color: #263e5f;
+}
+
+#btnVoltar:hover,
+#btnSair:hover,
+#btnLogin:hover,
+#btnCancelarCartao:hover,
+#btnFecharModalCartao:hover {
+    background: #d8e1eb;
+}
+
+/* BOTÕES DESABILITADOS */
+
+button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* ACESSIBILIDADE */
+
+button:focus-visible {
+    outline: 2px solid #2d5fa5;
+    outline-offset: 2px;
+}
+
+/* ESPAÇAMENTO ENTRE BOTÕES */
+
+.acoes-cabecalho,
+.modal-cartao-acoes {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#tabelaCartoes td:last-child {
+    white-space: nowrap;
+}
+
+#tabelaCartoes td:last-child button {
+    margin-right: 6px;
+}
+
+#tabelaCartoes td:last-child button:last-child {
+    margin-right: 0;
+}
+
+/* BOTÃO IMPORTAR */
+
+#btnImportarFatura {
+    background: #2d5fa5;
+    color: #ffffff;
+}
+
+#btnImportarFatura:hover:not(:disabled) {
+    background: #234d87;
+}
+
