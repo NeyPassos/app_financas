@@ -6,13 +6,9 @@
 let cartoesCadastrados = [];
 let cartoesCarregados = false;
 let salvandoCartao = false;
-
-/* ==========================================
-   CONTROLE DA IMPORTAÇÃO
-========================================== */
-
 let lancamentosImportacao = [];
 let arquivoImportacao = null;
+let importandoFatura = false;
 
 /* ==========================================
    INICIALIZAÇÃO
@@ -89,6 +85,12 @@ function configurarEventosCartao() {
 
   document.getElementById("btnAnalisarFatura")
   ?.addEventListener("click", analisarArquivoFatura);
+
+  document.getElementById("btnConfirmarImportacao")
+  .addEventListener(
+    "click",
+    confirmarImportacaoFatura
+  );
 
   // SAIR
   document.getElementById("btnSair")
@@ -619,6 +621,10 @@ async function confirmarExclusaoCartao() {
 
 function abrirModalImportacao() {
 
+  // Limpar dados da importação anterior
+  lancamentosImportacao = [];
+  arquivoImportacao = null;
+
   const modal = document.getElementById(
     "modalImportarFatura"
   );
@@ -1106,4 +1112,143 @@ function preencherFiltrosFaturas() {
 }
 
 
+/* ==========================================
+   CONFIRMAR IMPORTAÇÃO DA FATURA
+========================================== */
+
+async function confirmarImportacaoFatura() {
+
+  if (importandoFatura) return;
+
+  const idCartao = document.getElementById(
+    "importarCartao"
+  ).value;
+
+  const mes = Number(
+    document.getElementById("importarMes").value
+  );
+
+  const ano = Number(
+    document.getElementById("importarAno").value
+  );
+
+  const botao = document.getElementById(
+    "btnConfirmarImportacao"
+  );
+
+  if (!idCartao ||
+      !Number.isInteger(mes) ||
+      mes < 1 || mes > 12 ||
+      !Number.isInteger(ano) ||
+      ano < 1900 || ano > 9999) {
+
+    mostrarStatus("Informe cartão, mês e ano válidos.");
+    return;
+  }
+
+  if (!arquivoImportacao) {
+    mostrarStatus("Selecione e analise um arquivo.");
+    return;
+  }
+
+  if (!lancamentosImportacao.length) {
+    mostrarStatus("Nenhum lançamento analisado.");
+    return;
+  }
+
+  const dados = {
+    id_cartao: idCartao,
+    mes: mes,
+    ano: ano,
+    arquivo_origem: arquivoImportacao.name,
+    origem: "CSV",
+    lancamentos: lancamentosImportacao
+  };
+
+  try {
+
+    importandoFatura = true;
+
+    botao.disabled = true;
+    botao.textContent = "Importando...";
+
+    const resposta =
+      await apiImportarLancamentosCartao(dados);
+
+    if (!resposta ||
+        resposta.sucesso === false ||
+        resposta.erro) {
+
+      throw new Error(
+        resposta?.mensagem ||
+        resposta?.erro ||
+        "Falha ao importar a fatura."
+      );
+    }
+
+    const resultado = resposta.dados;
+
+    if (!resultado ||
+        !Number.isFinite(Number(resultado.importados)) ||
+        !Number.isFinite(Number(resultado.duplicados))) {
+
+      throw new Error(
+        "A API retornou uma resposta inesperada."
+      );
+    }
+
+    const mensagem =
+      "Importação concluída! " +
+      resultado.importados +
+      " lançamento(s) importado(s), " +
+      resultado.duplicados +
+      " duplicado(s).";
+
+    // Limpar dados temporários
+    lancamentosImportacao = [];
+    arquivoImportacao = null;
+
+    // Fechar modal
+    fecharModalImportacao();
+
+    // Atualizar filtros e listagem
+    document.getElementById(
+      "filtroCartao"
+    ).value = String(idCartao);
+
+    document.getElementById(
+      "filtroMes"
+    ).value = String(mes);
+
+    document.getElementById(
+      "filtroAno"
+    ).value = String(ano);
+
+    if (typeof carregarFaturas === "function") {
+      await carregarFaturas();
+    }
+
+    mostrarStatus(mensagem);
+
+  } catch (erro) {
+
+    console.error(
+      "Erro ao importar fatura:",
+      erro
+    );
+
+    mostrarStatus(
+      "Erro ao importar fatura: " +
+      erro.message
+    );
+
+  } finally {
+
+    importandoFatura = false;
+
+    botao.disabled = false;
+    botao.textContent = "Confirmar importação";
+
+  }
+}
 
