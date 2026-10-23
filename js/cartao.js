@@ -8,6 +8,13 @@ let cartoesCarregados = false;
 let salvandoCartao = false;
 
 /* ==========================================
+   CONTROLE DA IMPORTAÇÃO
+========================================== */
+
+let lancamentosImportacao = [];
+let arquivoImportacao = null;
+
+/* ==========================================
    INICIALIZAÇÃO
 ========================================== */
 
@@ -76,6 +83,9 @@ function configurarEventosCartao() {
   // SALVAR CARTÃO
   document.getElementById("formCartao")
     .addEventListener("submit", salvarCartao);
+
+  document.getElementById("btnAnalisarFatura")
+  ?.addEventListener("click", analisarArquivoFatura);
 
   // SAIR
   document.getElementById("btnSair")
@@ -676,6 +686,346 @@ function fecharModalImportacao() {
     "modalImportarFatura"
   ).hidden = true;
 
+}
+
+
+/* ==========================================
+   ANALISAR ARQUIVO DA FATURA
+========================================== */
+
+async function analisarArquivoFatura(evento) {
+
+  evento?.preventDefault();
+
+  const idCartao = document.getElementById("importarCartao").value;
+  const mes = Number(document.getElementById("importarMes").value);
+  const ano = Number(document.getElementById("importarAno").value);
+  const inputArquivo = document.getElementById("arquivoFatura");
+  const arquivo = inputArquivo?.files[0];
+
+  const btnConfirmar = document.getElementById(
+    "btnConfirmarImportacao"
+  );
+
+  const btnAnalisar = document.getElementById(
+    "btnAnalisarFatura"
+  );
+
+  lancamentosImportacao = [];
+  arquivoImportacao = null;
+
+  btnConfirmar.disabled = true;
+
+  document.getElementById("resumoImportacao").hidden = true;
+
+  if (!idCartao) {
+    mostrarStatus("Selecione um cartão.");
+    return;
+  }
+
+  if (!Number.isInteger(mes) || mes < 1 || mes > 12 ||
+      !Number.isInteger(ano) || ano < 1900 || ano > 9999) {
+    mostrarStatus("Informe o mês e ano da fatura.");
+    return;
+  }
+
+  if (!arquivo) {
+    mostrarStatus("Selecione o arquivo da fatura.");
+    return;
+  }
+
+  if (!arquivo.name.toLowerCase().endsWith(".csv")) {
+    mostrarStatus(
+      "Nesta etapa, selecione um arquivo CSV. PDF será implementado depois."
+    );
+    return;
+  }
+
+  try {
+
+    btnAnalisar.disabled = true;
+    btnAnalisar.textContent = "Analisando...";
+
+    const conteudo = await arquivo.text();
+
+    const registros = lerCSVFatura(conteudo);
+
+    if (!registros.length) {
+      throw new Error("O CSV não possui lançamentos.");
+    }
+
+    lancamentosImportacao = registros;
+    arquivoImportacao = arquivo;
+
+    exibirPreviaFatura(registros);
+
+    btnConfirmar.disabled = false;
+
+    mostrarStatus(
+      registros.length + " lançamento(s) identificado(s)."
+    );
+
+  } catch (erro) {
+
+    console.error("Erro na análise:", erro);
+    mostrarStatus("Erro ao analisar arquivo: " + erro.message);
+
+  } finally {
+
+    btnAnalisar.disabled = false;
+    btnAnalisar.textContent = "Analisar arquivo";
+
+  }
+}
+
+/* ==========================================
+   LEITURA CSV COM ASPAS E VÍRGULAS
+========================================== */
+
+function separarLinhasCSV(texto) {
+
+  const linhas = [];
+  let linha = [];
+  let campo = "";
+  let entreAspas = false;
+
+  texto = texto.replace(/^\uFEFF/, "");
+
+  for (let i = 0; i < texto.length; i++) {
+
+    const caractere = texto[i];
+
+    if (caractere === '"') {
+
+      if (entreAspas && texto[i + 1] === '"') {
+        campo += '"';
+        i++;
+      } else {
+        entreAspas = !entreAspas;
+      }
+
+    } else if (caractere === "," && !entreAspas) {
+
+      linha.push(campo);
+      campo = "";
+
+    } else if (
+      (caractere === "\n" || caractere === "\r") &&
+      !entreAspas
+    ) {
+
+      if (caractere === "\r" && texto[i + 1] === "\n") {
+        i++;
+      }
+
+      linha.push(campo);
+
+      if (linha.some(valor => valor.trim() !== "")) {
+        linhas.push(linha);
+      }
+
+      linha = [];
+      campo = "";
+
+    } else {
+
+      campo += caractere;
+
+    }
+  }
+
+  if (entreAspas) {
+    throw new Error("CSV contém aspas não fechadas.");
+  }
+
+  linha.push(campo);
+
+  if (linha.some(valor => valor.trim() !== "")) {
+    linhas.push(linha);
+  }
+
+  return linhas;
+}
+
+/* ==========================================
+   CONVERTER VALOR MONETÁRIO
+========================================== */
+
+function converterValorFatura(valor) {
+
+  const texto = String(valor ?? "")
+    .trim()
+    .replace(/\s/g, "");
+
+  if (!/^-?\d{1,3}(\.\d{3})*(,\d+)?$|^-?\d+(,\d+)?$/.test(texto)) {
+    throw new Error("Valor monetário inválido: " + valor);
+  }
+
+  const numero = Number(
+    texto.replace(/\./g, "").replace(",", ".")
+  );
+
+  if (!Number.isFinite(numero)) {
+    throw new Error("Valor inválido: " + valor);
+  }
+
+  return numero;
+}
+
+/* ==========================================
+   INTERPRETAR CSV DO NUBANK
+========================================== */
+
+function lerCSVFatura(conteudo) {
+
+  const linhas = separarLinhasCSV(conteudo);
+
+  const cabecalho = linhas.shift()
+    .map(campo => campo.trim().toLowerCase());
+
+  const indiceData = cabecalho.indexOf("date");
+  const indiceDescricao = cabecalho.indexOf("title");
+  const indiceValor = cabecalho.indexOf("amount");
+
+  if (
+    indiceData === -1 ||
+    indiceDescricao === -1 ||
+    indiceValor === -1
+  ) {
+    throw new Error(
+      "Formato não reconhecido. Esperado: date,title,amount."
+    );
+  }
+
+  return linhas.map((linha, indice) => {
+
+    const data = String(linha[indiceData] || "").trim();
+    const descricao = String(linha[indiceDescricao] || "").trim();
+
+    const valor = converterValorFatura(
+      linha[indiceValor]
+    );
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(data) ||
+        !descricao) {
+      throw new Error(
+        "Dados inválidos na linha " + (indice + 2)
+      );
+    }
+
+    const [ano, mes, dia] = data.split("-").map(Number);
+
+    const dataValidada = new Date(Date.UTC(ano, mes - 1, dia));
+
+    if (
+      dataValidada.getUTCFullYear() !== ano ||
+      dataValidada.getUTCMonth() !== mes - 1 ||
+      dataValidada.getUTCDate() !== dia
+    ) {
+      throw new Error(
+        "Data inválida na linha " + (indice + 2)
+      );
+    }
+
+    const parcela = descricao.match(
+      /parcela\s+(\d+)\s*\/\s*(\d+)/i
+    );
+
+    const parcelaAtual = parcela ? Number(parcela[1]) : 1;
+    const totalParcelas = parcela ? Number(parcela[2]) : 1;
+
+    if (
+      parcelaAtual < 1 ||
+      totalParcelas < parcelaAtual
+    ) {
+      throw new Error(
+        "Parcela inválida na linha " + (indice + 2)
+      );
+    }
+
+    const tipoMovimento = valor < 0
+      ? "Pagamento"
+      : /(^|\s)iof(\s|$)/i.test(descricao)
+        ? "Encargo"
+        : "Compra";
+
+    return {
+      data_compra: data,
+      descricao: descricao,
+      parcela_atual: parcelaAtual,
+      total_parcelas: totalParcelas,
+      valor: valor,
+      tipo_movimento: tipoMovimento
+    };
+
+  });
+}
+
+/* ==========================================
+   EXIBIR PRÉVIA DA FATURA
+========================================== */
+
+function exibirPreviaFatura(lancamentos) {
+
+  const lista = document.getElementById(
+    "listaPreviaFatura"
+  );
+
+  const resumo = document.getElementById(
+    "resumoImportacao"
+  );
+
+  lista.replaceChildren();
+
+  let compras = 0;
+  let pagamentos = 0;
+
+  const moeda = new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL"
+  });
+
+  lancamentos.forEach(item => {
+
+    const linha = lista.insertRow();
+
+    const valores = [
+      item.data_compra.split("-").reverse().join("/"),
+      item.descricao,
+      item.parcela_atual + "/" + item.total_parcelas,
+      moeda.format(item.valor),
+      item.tipo_movimento
+    ];
+
+    valores.forEach(valor => {
+      const celula = linha.insertCell();
+      celula.textContent = valor;
+    });
+
+    if (item.valor >= 0) {
+      compras += item.valor;
+    } else {
+      pagamentos += Math.abs(item.valor);
+    }
+
+  });
+
+  resumo.hidden = false;
+
+  // Exibe os totais sem depender de IDs adicionais no HTML.
+  let totais = document.getElementById("totaisPreviaFatura");
+
+  if (!totais) {
+    totais = document.createElement("p");
+    totais.id = "totaisPreviaFatura";
+    resumo.appendChild(totais);
+  }
+
+  totais.textContent =
+    "Lançamentos: " + lancamentos.length +
+    " | Compras e encargos: " + moeda.format(compras) +
+    " | Pagamentos: " + moeda.format(pagamentos) +
+    " | Saldo líquido: " + moeda.format(compras - pagamentos);
 }
 
 
