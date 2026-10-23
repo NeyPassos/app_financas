@@ -1778,7 +1778,7 @@ function exibirFaturas() {
       fatura.id_fatura,
       nomeCartao,
       referencia,
-      fatura.vencimento || "-",
+      formatarDataVencimento(fatura.vencimento),
       formatarValorFatura(
       fatura.valor_oficial !== "" &&
       fatura.valor_oficial !== null &&
@@ -1891,8 +1891,70 @@ async function consultarFatura(idFatura) {
 
   titulo.textContent = "Consultar fatura";
 
-  informacoes.textContent =
-    nomeCartao + " | Referência: " + referencia;
+  
+/* ==========================================
+   RESUMO DA FATURA
+========================================== */
+
+const moedaResumo = new Intl.NumberFormat("pt-BR", {
+  style: "currency",
+  currency: "BRL"
+});
+
+const possuiValorOficial =
+  fatura.valor_oficial !== "" &&
+  fatura.valor_oficial !== null &&
+  fatura.valor_oficial !== undefined;
+
+const valorOficial = possuiValorOficial
+  ? formatarValorFatura(
+      fatura.valor_oficial,
+      moedaResumo
+    )
+  : "Não informado";
+
+const saldoLancamentos = formatarValorFatura(
+  fatura.valor_total,
+  moedaResumo
+);
+
+const vencimento = formatarDataVencimento(
+  fatura.vencimento
+);
+
+informacoes.replaceChildren();
+
+informacoes.classList.add("resumo-consulta-fatura");
+
+const camposResumo = [
+  ["Cartão", nomeCartao],
+  ["Referência", referencia],
+  ["Vencimento", vencimento],
+  ["Valor oficial", valorOficial],
+  ["Saldo dos lançamentos", saldoLancamentos],
+  ["Situação", fatura.situacao || "-"]
+];
+
+camposResumo.forEach(([rotulo, valor]) => {
+
+  const campo = document.createElement("div");
+  campo.className = "resumo-consulta-campo";
+
+  const tituloCampo = document.createElement("span");
+  tituloCampo.className = "resumo-consulta-rotulo";
+  tituloCampo.textContent = rotulo;
+
+  const valorCampo = document.createElement("strong");
+  valorCampo.className = "resumo-consulta-valor";
+  valorCampo.textContent = valor;
+
+  campo.appendChild(tituloCampo);
+  campo.appendChild(valorCampo);
+
+  informacoes.appendChild(campo);
+
+});
+
 
   lista.replaceChildren();
 
@@ -2009,4 +2071,32 @@ function fecharConsultaFatura() {
     "modalConsultarFatura"
   ).hidden = true;
 
+}
+
+
+/* ==========================================
+   FORMATAR DATA DE VENCIMENTO
+========================================== */
+
+function formatarDataVencimento(valor) {
+
+  if (!valor) return "-";
+
+  const texto = String(valor).trim();
+
+  // Formato AAAA-MM-DD
+  const data = texto.match(
+    /^(\d{4})-(\d{2})-(\d{2})$/
+  );
+
+  if (data) {
+    return `${data[3]}/${data[2]}/${data[1]}`;
+  }
+
+  // Data já formatada
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(texto)) {
+    return texto;
+  }
+
+  return texto;
 }

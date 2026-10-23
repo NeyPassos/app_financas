@@ -610,3 +610,61 @@ button:focus-visible {
         font-size: 13px;
     }
 }
+
+
+/* ==========================================
+   RESUMO DO MODAL CONSULTAR FATURA
+========================================== */
+
+#modalConsultarFatura .resumo-consulta-fatura {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+
+    margin: 0 0 24px;
+    padding: 18px;
+
+    background: #f5f8fc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+#modalConsultarFatura .resumo-consulta-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+#modalConsultarFatura .resumo-consulta-rotulo {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+#modalConsultarFatura .resumo-consulta-valor {
+    color: #172b4d;
+    font-size: 14px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+/* Tablets */
+@media (max-width: 768px) {
+
+    #modalConsultarFatura .resumo-consulta-fatura {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 14px;
+        gap: 12px;
+    }
+
+}
+
+/* Celulares */
+@media (max-width: 480px) {
+
+    #modalConsultarFatura .resumo-consulta-fatura {
+        grid-template-columns: 1fr;
+    }
+
+}
