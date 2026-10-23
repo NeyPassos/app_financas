@@ -136,6 +136,27 @@ function configurarEventosCartao() {
       }
     });
 
+    /* ==========================================
+      EVENTOS CONSULTAR FATURA
+    ========================================== */
+
+    document.getElementById("btnFecharConsultaFatura")
+      ?.addEventListener("click", fecharConsultaFatura);
+
+    document.getElementById("btnFecharConsultaRodape")
+      ?.addEventListener("click", fecharConsultaFatura);
+
+    document.getElementById("modalConsultarFatura")
+      ?.addEventListener("click", evento => {
+
+        if (evento.target.id === "modalConsultarFatura") {
+          fecharConsultaFatura();
+        }
+
+      });
+
+
+
   /* ==========================================
      EXCLUSÃO DE CARTÕES
   ========================================== */
@@ -165,6 +186,7 @@ function configurarEventosCartao() {
       fecharModalCartao();
       fecharExcluirCartao();
       fecharModalImportacao();
+      fecharConsultaFatura();
 
     }
   });
@@ -1464,12 +1486,173 @@ function formatarValorFatura(valor, moeda) {
     : "-";
 }
 
-function consultarFatura(idFatura) {
 
-  mostrarStatus(
-    "Consulta da fatura " +
-    idFatura +
-    " será implementada na próxima etapa."
+/* ==========================================
+   CONSULTAR LANÇAMENTOS DA FATURA
+========================================== */
+
+async function consultarFatura(idFatura) {
+
+  const modal = document.getElementById(
+    "modalConsultarFatura"
   );
+
+  const lista = document.getElementById(
+    "listaConsultaFatura"
+  );
+
+  const titulo = document.getElementById(
+    "tituloConsultarFatura"
+  );
+
+  const informacoes = document.getElementById(
+    "informacoesConsultaFatura"
+  );
+
+  const totalElemento = document.getElementById(
+    "totalConsultaFatura"
+  );
+
+  const fatura = faturasCadastradas.find(
+    item => String(item.id_fatura) === String(idFatura)
+  );
+
+  if (!fatura) {
+    mostrarStatus("Fatura não encontrada.");
+    return;
+  }
+
+  const cartao = cartoesCadastrados.find(
+    item =>
+      String(item.id_cartao) === String(fatura.id_cartao)
+  );
+
+  const nomeCartao = cartao
+    ? cartao.banco + " - " + cartao.nome_cartao
+    : "Cartão " + fatura.id_cartao;
+
+  const referencia =
+    String(fatura.mes).padStart(2, "0") +
+    "/" + fatura.ano;
+
+  titulo.textContent = "Consultar fatura";
+
+  informacoes.textContent =
+    nomeCartao + " | Referência: " + referencia;
+
+  lista.replaceChildren();
+
+  const linhaCarregando = lista.insertRow();
+  const celulaCarregando = linhaCarregando.insertCell();
+
+  celulaCarregando.colSpan = 5;
+  celulaCarregando.textContent = "Carregando lançamentos...";
+
+  totalElemento.textContent = "";
+
+  modal.hidden = false;
+
+  try {
+
+    const resposta =
+      await apiListarLancamentosCartao(idFatura);
+
+    const lancamentos = Array.isArray(resposta.dados)
+      ? resposta.dados
+      : [];
+
+    lista.replaceChildren();
+
+    if (!lancamentos.length) {
+
+      const linha = lista.insertRow();
+      const celula = linha.insertCell();
+
+      celula.colSpan = 5;
+      celula.textContent =
+        "Nenhum lançamento encontrado.";
+
+      return;
+    }
+
+    const moeda = new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL"
+    });
+
+    let total = 0;
+
+    lancamentos.forEach(item => {
+
+      const linha = lista.insertRow();
+
+      const data = String(item.data_compra || "");
+
+      const dataFormatada =
+        /^\d{4}-\d{2}-\d{2}$/.test(data)
+          ? data.split("-").reverse().join("/")
+          : data;
+
+      const parcela =
+        item.parcela_atual + "/" + item.total_parcelas;
+
+      const textoValor = String(item.valor ?? "")
+        .replace(/R\$\s?/g, "")
+        .trim();
+
+      const valor = Number(
+        textoValor.includes(",")
+          ? textoValor.replace(/\./g, "").replace(",", ".")
+          : textoValor
+      );
+
+      const valorValido = Number.isFinite(valor)
+        ? valor
+        : 0;
+
+      total += valorValido;
+
+      const valores = [
+        dataFormatada,
+        item.descricao || "",
+        parcela,
+        moeda.format(valorValido),
+        item.tipo_movimento || ""
+      ];
+
+      valores.forEach(valorCelula => {
+
+        const celula = linha.insertCell();
+        celula.textContent = valorCelula;
+
+      });
+
+    });
+
+    totalElemento.textContent =
+      "Lançamentos: " + lancamentos.length +
+      " | Saldo líquido: " + moeda.format(total);
+
+  } catch (erro) {
+
+    console.error("Erro ao consultar fatura:", erro);
+
+    lista.replaceChildren();
+
+    const linha = lista.insertRow();
+    const celula = linha.insertCell();
+
+    celula.colSpan = 5;
+    celula.textContent =
+      "Erro ao carregar lançamentos: " + erro.message;
+
+  }
+}
+
+function fecharConsultaFatura() {
+
+  document.getElementById(
+    "modalConsultarFatura"
+  ).hidden = true;
 
 }

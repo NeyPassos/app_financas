@@ -460,6 +460,64 @@
   </div>
 </div>
 
+
+<!-- ==========================================
+     MODAL CONSULTAR FATURA
+========================================== -->
+
+<div id="modalConsultarFatura"
+     class="modal-cartao"
+     hidden>
+
+  <div class="modal-cartao-conteudo modal-importacao"
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="tituloConsultarFatura">
+
+    <div class="modal-cartao-cabecalho">
+
+      <h2 id="tituloConsultarFatura">
+        Consultar fatura
+      </h2>
+
+      <button type="button"
+              id="btnFecharConsultaFatura">
+        Fechar
+      </button>
+
+    </div>
+
+    <p id="informacoesConsultaFatura"></p>
+
+    <div class="tabela-responsiva">
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Descrição</th>
+            <th>Parcela</th>
+            <th>Valor</th>
+            <th>Tipo</th>
+          </tr>
+        </thead>
+
+        <tbody id="listaConsultaFatura"></tbody>
+      </table>
+    </div>
+
+    <p id="totalConsultaFatura"></p>
+
+    <div class="modal-cartao-acoes">
+      <button type="button"
+              id="btnFecharConsultaRodape">
+        Fechar
+      </button>
+    </div>
+
+  </div>
+</div>
+
+
   <!-- SCRIPTS -->
   <script src="https://accounts.google.com/gsi/client"
         defer></script>
