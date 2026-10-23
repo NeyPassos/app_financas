@@ -55,24 +55,29 @@ async function iniciarPaginaCartoes() {
   }
 }
 
+
 /* ==========================================
-   EVENTOS
+   EVENTOS DOS CARTÕES
 ========================================== */
 
 function configurarEventosCartao() {
 
+  // NOVO CARTÃO
   document.getElementById("btnNovoCartao")
     .addEventListener("click", abrirNovoCartao);
 
+  // FECHAR MODAL CARTÃO
   document.getElementById("btnFecharModalCartao")
     .addEventListener("click", fecharModalCartao);
 
   document.getElementById("btnCancelarCartao")
     .addEventListener("click", fecharModalCartao);
 
+  // SALVAR CARTÃO
   document.getElementById("formCartao")
     .addEventListener("submit", salvarCartao);
 
+  // SAIR
   document.getElementById("btnSair")
     .addEventListener("click", () => {
 
@@ -83,50 +88,39 @@ function configurarEventosCartao() {
       window.location.href = "index.html";
     });
 
+  // FECHAR MODAL CARTÃO AO CLICAR FORA
   document.getElementById("modalCartao")
     .addEventListener("click", evento => {
 
       if (evento.target.id === "modalCartao") {
         fecharModalCartao();
       }
-
     });
 
-    document.addEventListener("keydown", evento => {
+  /* ==========================================
+     IMPORTAÇÃO DE FATURAS
+  ========================================== */
 
-    if (evento.key === "Escape") {
+  document.getElementById("btnImportarFatura")
+    ?.addEventListener("click", abrirModalImportacao);
 
-      fecharModalCartao();
-      fecharExcluirCartao();
+  document.getElementById("btnFecharImportacao")
+    ?.addEventListener("click", fecharModalImportacao);
 
-    }
+  document.getElementById("btnCancelarImportacao")
+    ?.addEventListener("click", fecharModalImportacao);
 
-          /* ==========================================
-        EVENTOS DO MODAL DE IMPORTAÇÃO
-      ========================================== */
+  // FECHAR MODAL AO CLICAR FORA
+  document.getElementById("modalImportarFatura")
+    ?.addEventListener("click", evento => {
 
-      const btnImportarFatura =
-        document.getElementById("btnImportarFatura");
-
-      if (btnImportarFatura) {
-
-        btnImportarFatura.addEventListener(
-          "click",
-          abrirModalImportacao
-        );
-
+      if (evento.target.id === "modalImportarFatura") {
+        fecharModalImportacao();
       }
-
-      document.getElementById("btnFecharImportacao")
-        ?.addEventListener("click", fecharModalImportacao);
-
-      document.getElementById("btnCancelarImportacao")
-        ?.addEventListener("click", fecharModalImportacao);
-
-  });
+    });
 
   /* ==========================================
-     EVENTOS DE EXCLUSÃO
+     EXCLUSÃO DE CARTÕES
   ========================================== */
 
   document.getElementById("btnCancelarExclusao")
@@ -141,10 +135,25 @@ function configurarEventosCartao() {
       if (evento.target.id === "modalExcluirCartao") {
         fecharExcluirCartao();
       }
-
     });
-}
 
+  /* ==========================================
+     TECLA ESCAPE
+  ========================================== */
+
+  document.addEventListener("keydown", evento => {
+
+    if (evento.key === "Escape") {
+
+      fecharModalCartao();
+      fecharExcluirCartao();
+      fecharModalImportacao();
+
+    }
+  });
+
+}
+  
 /* ==========================================
    CARREGAR CARTÕES
 ========================================== */
