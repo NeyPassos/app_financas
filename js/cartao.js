@@ -21,6 +21,9 @@ let arquivoImportacao = null;
 document.addEventListener("DOMContentLoaded", () => {
 
   configurarEventosCartao();
+
+  preencherFiltrosFaturas();
+
   iniciarPaginaCartoes();
 
 });
@@ -1026,6 +1029,80 @@ function exibirPreviaFatura(lancamentos) {
     " | Compras e encargos: " + moeda.format(compras) +
     " | Pagamentos: " + moeda.format(pagamentos) +
     " | Saldo líquido: " + moeda.format(compras - pagamentos);
+}
+
+
+/* ==========================================
+   PREENCHER FILTROS DE MÊS E ANO
+========================================== */
+
+function preencherFiltrosFaturas() {
+
+  const filtroMes = document.getElementById("filtroMes");
+  const filtroAno = document.getElementById("filtroAno");
+
+  if (!filtroMes || !filtroAno) return;
+
+  const meses = [
+    "Janeiro",
+    "Fevereiro",
+    "Março",
+    "Abril",
+    "Maio",
+    "Junho",
+    "Julho",
+    "Agosto",
+    "Setembro",
+    "Outubro",
+    "Novembro",
+    "Dezembro"
+  ];
+
+  // Preservar seleções anteriores
+  const mesSelecionado = filtroMes.value;
+  const anoSelecionado = filtroAno.value;
+
+  filtroMes.innerHTML = '<option value="">Todos</option>';
+
+  meses.forEach((mes, indice) => {
+
+    const option = document.createElement("option");
+
+    option.value = String(indice + 1);
+    option.textContent = mes;
+
+    filtroMes.appendChild(option);
+
+  });
+
+  filtroAno.innerHTML = '<option value="">Todos</option>';
+
+  const anoAtual = new Date().getFullYear();
+
+  // Exibir anos anteriores e futuros
+  for (let ano = anoAtual + 2; ano >= anoAtual - 5; ano--) {
+
+    const option = document.createElement("option");
+
+    option.value = String(ano);
+    option.textContent = String(ano);
+
+    filtroAno.appendChild(option);
+
+  }
+
+  // Restaurar seleção, se existir
+  if ([...filtroMes.options].some(
+    option => option.value === mesSelecionado
+  )) {
+    filtroMes.value = mesSelecionado;
+  }
+
+  if ([...filtroAno.options].some(
+    option => option.value === anoSelecionado
+  )) {
+    filtroAno.value = anoSelecionado;
+  }
 }
 
 
