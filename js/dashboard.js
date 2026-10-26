@@ -8,13 +8,14 @@ const elementoDashboard = id =>
   document.getElementById(id);
 
 
+
 /* ==========================================
-   CARREGAR PARCELAMENTOS
+   CARREGAR DASHBOARD
 ========================================== */
 
 async function carregarDashboard() {
 
-    const tabela = elementoDashboard(
+    const tabela = document.getElementById(
         "listaParcelamentos"
     );
 
@@ -29,8 +30,7 @@ async function carregarDashboard() {
             ? resposta.dados
             : [];
 
-        // Ordenar das que menos faltam
-        // para as que mais faltam.
+        // Ordenar pela menor quantidade restante.
         compras.sort((a, b) =>
             Number(a.parcelas_restantes) -
             Number(b.parcelas_restantes)
@@ -43,33 +43,32 @@ async function carregarDashboard() {
             const linha = tabela.insertRow();
 
             /* ==================================
-               NOME DO BANCO
+               CARTÃO - SOMENTE BANCO
             ================================== */
 
-            const nomeCompleto = String(
+            const cartao = String(
                 compra.cartao || ""
             ).trim();
 
-            const banco = nomeCompleto
-                .split(" - ")[0]
+            const banco = cartao
+                .split(/\s+-\s+/)[0]
                 .trim();
 
             /* ==================================
-               DESCRIÇÃO SEM PARCELAMENTO
+               DESCRIÇÃO SEM TEXTO DA PARCELA
             ================================== */
 
-            const descricao = String(
+            let descricao = String(
                 compra.descricao || ""
-            )
-            .replace(
-                /\s*[-–]?\s*parcela\s+\d+\s*\/\s*\d+\s*$/i,
+            ).trim();
+
+            descricao = descricao.replace(
+                /\s*[-–]?\s*parcela\s*\d+\s*\/\s*\d+\s*$/i,
                 ""
-            )
-            .trim();
+            ).trim();
 
             /* ==================================
-               PARCELAS
-               TOTAL / RESTANTES
+               TOTAL / PARCELAS RESTANTES
             ================================== */
 
             const total = Number(
@@ -80,30 +79,25 @@ async function carregarDashboard() {
                 compra.parcelas_restantes || 0
             );
 
-            const parcelas = total + "/" + restantes;
+            const parcelas = `${total}/${restantes}`;
 
             /* ==================================
-               PREENCHER TABELA
+               CRIAR SOMENTE TRÊS COLUNAS
             ================================== */
 
-            const valores = [
-                banco,
-                descricao,
-                parcelas
-            ];
+            const colunaCartao = linha.insertCell();
+            colunaCartao.textContent = banco;
 
-            valores.forEach(valor => {
+            const colunaDescricao = linha.insertCell();
+            colunaDescricao.textContent = descricao;
 
-                const coluna = linha.insertCell();
-
-                coluna.textContent = valor;
-
-            });
+            const colunaParcelas = linha.insertCell();
+            colunaParcelas.textContent = parcelas;
 
         });
 
         /* ======================================
-           TABELA VAZIA
+           NENHUMA COMPRA ENCONTRADA
         ====================================== */
 
         if (!compras.length) {
@@ -139,6 +133,7 @@ async function carregarDashboard() {
     }
 
 }
+
 
 /* ==========================================
    INICIALIZAR DASHBOARD
