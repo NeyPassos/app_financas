@@ -62,6 +62,7 @@ function recuperarSessaoGoogle() {
   }
 }
 
+
 /* ==========================================
    IDENTIFICAR MÓDULO ATUAL
 ========================================== */
@@ -74,6 +75,10 @@ function identificarModulo() {
 
   if (document.getElementById("listaContas")) {
     return "contas";
+  }
+
+  if (document.getElementById("listaParcelamentos")) {
+    return "dashboard";
   }
 
   return "outro";
@@ -278,6 +283,7 @@ function atualizarBotoesAutenticacao() {
   }
 }
 
+
 /* ==========================================
    CARREGAR MÓDULO ATUAL
 ========================================== */
@@ -297,7 +303,15 @@ async function carregarModuloAtual() {
     if (typeof carregarCartoes === "function") {
       await carregarCartoes();
     }
+
+  } else if (modulo === "dashboard") {
+
+    if (typeof carregarDashboard === "function") {
+      await carregarDashboard();
+    }
+
   }
+
 }
 
 /* ==========================================
@@ -324,6 +338,28 @@ function sairGoogle() {
   }
 
   const listaCartoes = document.getElementById("listaCartoes");
+  
+    const listaParcelamentos = document.getElementById(
+      "listaParcelamentos"
+    );
+
+    if (listaParcelamentos) {
+
+      listaParcelamentos.replaceChildren();
+
+      ["totalCompras", "totalParcelasPagas", "totalParcelasRestantes"]
+        .forEach(id => {
+
+      const elemento = document.getElementById(id);
+
+      if (elemento) {
+        elemento.textContent = "0";
+      }
+
+    });
+
+}
+
 
   if (listaCartoes) {
     listaCartoes.replaceChildren();

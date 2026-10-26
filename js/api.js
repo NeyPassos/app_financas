@@ -160,4 +160,18 @@ async function apiExcluirCartao(idCartao) {
 }
 
 
+/* ==========================================
+   DASHBOARD - PARCELAMENTOS
+========================================== */
+
+async function apiListarParcelamentosDashboard() {
+
+  return executarAPI(
+    "listarParcelamentosDashboard"
+  );
+
+}
+
+
+
 
