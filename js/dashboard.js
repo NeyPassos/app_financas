@@ -8,16 +8,22 @@ const elementoDashboard = id =>
   document.getElementById(id);
 
 
+/* ==========================================
+   CONFIGURAÇÕES DA PAGINAÇÃO
+========================================== */
+
+const ITENS_POR_PAGINA_DASHBOARD = 10;
+
+let comprasDashboard = [];
+
+let paginaAtualDashboard = 1;
+
 
 /* ==========================================
    CARREGAR DASHBOARD
 ========================================== */
 
 async function carregarDashboard() {
-
-    const tabela = document.getElementById(
-        "listaParcelamentos"
-    );
 
     try {
 
@@ -26,95 +32,21 @@ async function carregarDashboard() {
         const resposta =
             await apiListarParcelamentosDashboard();
 
-        const compras = Array.isArray(resposta.dados)
+        comprasDashboard = Array.isArray(resposta.dados)
             ? resposta.dados
             : [];
 
-        // Ordenar pela menor quantidade restante.
-        compras.sort((a, b) =>
+        comprasDashboard.sort((a, b) =>
             Number(a.parcelas_restantes) -
             Number(b.parcelas_restantes)
         );
 
-        tabela.replaceChildren();
+        paginaAtualDashboard = 1;
 
-        compras.forEach(compra => {
-
-            const linha = tabela.insertRow();
-
-            /* ==================================
-               CARTÃO - SOMENTE BANCO
-            ================================== */
-
-            const cartao = String(
-                compra.cartao || ""
-            ).trim();
-
-            const banco = cartao
-                .split(/\s+-\s+/)[0]
-                .trim();
-
-            /* ==================================
-               DESCRIÇÃO SEM TEXTO DA PARCELA
-            ================================== */
-
-            let descricao = String(
-                compra.descricao || ""
-            ).trim();
-
-            descricao = descricao.replace(
-                /\s*[-–]?\s*parcela\s*\d+\s*\/\s*\d+\s*$/i,
-                ""
-            ).trim();
-
-            /* ==================================
-               TOTAL / PARCELAS RESTANTES
-            ================================== */
-
-            const total = Number(
-                compra.total_parcelas || 0
-            );
-
-            const restantes = Number(
-                compra.parcelas_restantes || 0
-            );
-
-            const parcelas = `${total}/${restantes}`;
-
-            /* ==================================
-               CRIAR SOMENTE TRÊS COLUNAS
-            ================================== */
-
-            const colunaCartao = linha.insertCell();
-            colunaCartao.textContent = banco;
-
-            const colunaDescricao = linha.insertCell();
-            colunaDescricao.textContent = descricao;
-
-            const colunaParcelas = linha.insertCell();
-            colunaParcelas.textContent = parcelas;
-
-        });
-
-        /* ======================================
-           NENHUMA COMPRA ENCONTRADA
-        ====================================== */
-
-        if (!compras.length) {
-
-            const linha = tabela.insertRow();
-
-            const coluna = linha.insertCell();
-
-            coluna.colSpan = 3;
-
-            coluna.textContent =
-                "Nenhuma compra parcelada encontrada.";
-
-        }
+        renderizarDashboard();
 
         mostrarStatus(
-            compras.length +
+            comprasDashboard.length +
             " compra(s) parcelada(s) encontrada(s)."
         );
 
@@ -131,6 +63,141 @@ async function carregarDashboard() {
         );
 
     }
+
+}
+
+
+/* ==========================================
+   RENDERIZAR DASHBOARD COM PAGINAÇÃO
+========================================== */
+
+function renderizarDashboard() {
+
+    const tabela = elementoDashboard(
+        "listaParcelamentos"
+    );
+
+    tabela.replaceChildren();
+
+    const total = comprasDashboard.length;
+
+    const totalPaginas = Math.max(
+        1,
+        Math.ceil(total / ITENS_POR_PAGINA_DASHBOARD)
+    );
+
+    paginaAtualDashboard = Math.max(
+        1,
+        Math.min(paginaAtualDashboard, totalPaginas)
+    );
+
+    const inicio =
+        (paginaAtualDashboard - 1) *
+        ITENS_POR_PAGINA_DASHBOARD;
+
+    const itens = comprasDashboard.slice(
+        inicio,
+        inicio + ITENS_POR_PAGINA_DASHBOARD
+    );
+
+    /* ======================================
+       LISTAR COMPRAS
+    ====================================== */
+
+    itens.forEach(compra => {
+
+        const linha = tabela.insertRow();
+
+        const cartao = String(
+            compra.cartao || ""
+        ).trim();
+
+        const banco = cartao
+            .split(/\s+-\s+/)[0]
+            .trim();
+
+        let descricao = String(
+            compra.descricao || ""
+        ).trim();
+
+        descricao = descricao.replace(
+            /\s*[-–]?\s*parcela\s*\d+\s*\/\s*\d+\s*$/i,
+            ""
+        ).trim();
+
+        const totalParcelas = Number(
+            compra.total_parcelas || 0
+        );
+
+        const restantes = Number(
+            compra.parcelas_restantes || 0
+        );
+
+        const valores = [
+            banco,
+            descricao,
+            `${totalParcelas}/${restantes}`
+        ];
+
+        valores.forEach(valor => {
+
+            const coluna = linha.insertCell();
+
+            coluna.textContent = valor;
+
+        });
+
+    });
+
+    /* ======================================
+       LISTA VAZIA
+    ====================================== */
+
+    if (!itens.length) {
+
+        const linha = tabela.insertRow();
+
+        const coluna = linha.insertCell();
+
+        coluna.colSpan = 3;
+
+        coluna.textContent =
+            "Nenhuma compra parcelada encontrada.";
+
+    }
+
+    /* ======================================
+       INFORMAÇÕES DA PAGINAÇÃO
+    ====================================== */
+
+    const primeiroRegistro = total
+        ? inicio + 1
+        : 0;
+
+    const ultimoRegistro = Math.min(
+        inicio + ITENS_POR_PAGINA_DASHBOARD,
+        total
+    );
+
+    elementoDashboard(
+        "infoPaginaDashboard"
+    ).textContent =
+        `${primeiroRegistro}–${ultimoRegistro} de ${total} registros`;
+
+    elementoDashboard(
+        "numeroPaginaDashboard"
+    ).textContent =
+        `Página ${paginaAtualDashboard} de ${totalPaginas}`;
+
+    elementoDashboard(
+        "paginaAnteriorDashboard"
+    ).disabled =
+        paginaAtualDashboard <= 1;
+
+    elementoDashboard(
+        "paginaProximaDashboard"
+    ).disabled =
+        paginaAtualDashboard >= totalPaginas;
 
 }
 
@@ -153,6 +220,50 @@ window.addEventListener("load", () => {
     "click",
     sairGoogle
   );
+
+  
+/* ==========================================
+   BOTÃO PÁGINA ANTERIOR
+========================================== */
+
+elementoDashboard(
+    "paginaAnteriorDashboard"
+)?.addEventListener("click", () => {
+
+    if (paginaAtualDashboard > 1) {
+
+        paginaAtualDashboard--;
+
+        renderizarDashboard();
+
+    }
+
+});
+
+
+/* ==========================================
+   BOTÃO PRÓXIMA PÁGINA
+========================================== */
+
+elementoDashboard(
+    "paginaProximaDashboard"
+)?.addEventListener("click", () => {
+
+    const totalPaginas = Math.ceil(
+        comprasDashboard.length /
+        ITENS_POR_PAGINA_DASHBOARD
+    );
+
+    if (paginaAtualDashboard < totalPaginas) {
+
+        paginaAtualDashboard++;
+
+        renderizarDashboard();
+
+    }
+
+});
+
 
   try {
 
