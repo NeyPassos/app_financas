@@ -668,3 +668,71 @@ button:focus-visible {
     }
 
 }
+
+
+/* ==========================================
+   MODAL EDITAR FATURA
+========================================== */
+
+#modalEditarFatura .modal-editar-fatura {
+    width: 95%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 28px 32px;
+    box-sizing: border-box;
+}
+
+#modalEditarFatura .campo-editar-fatura {
+    margin-bottom: 20px;
+}
+
+#modalEditarFatura .campo-editar-fatura label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #172b4d;
+}
+
+#modalEditarFatura .campo-editar-fatura p {
+    margin: 0;
+    padding: 11px 12px;
+    background: #f5f8fc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+}
+
+#modalEditarFatura input[type="date"],
+#modalEditarFatura select {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font: inherit;
+    box-sizing: border-box;
+}
+
+#modalEditarFatura .modal-cartao-acoes {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid #e2e8f0;
+}
+
+/* Espaçamento entre Consultar e Editar */
+#listaFaturas td:last-child {
+    white-space: nowrap;
+}
+
+#listaFaturas td:last-child button + button {
+    margin-left: 8px;
+}
+
+@media (max-width: 600px) {
+    #modalEditarFatura .modal-editar-fatura {
+        padding: 20px;
+    }
+}
+

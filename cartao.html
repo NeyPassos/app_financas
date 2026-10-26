@@ -518,6 +518,87 @@
 </div>
 
 
+<!-- ==========================================
+     MODAL EDITAR FATURA
+========================================== -->
+
+<div id="modalEditarFatura"
+     class="modal-cartao"
+     hidden>
+
+  <div class="modal-cartao-conteudo modal-editar-fatura"
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="tituloEditarFatura">
+
+    <div class="modal-cartao-cabecalho">
+
+      <h2 id="tituloEditarFatura">
+        Editar fatura
+      </h2>
+
+      <button type="button"
+              id="btnFecharEditarFatura">
+        Fechar
+      </button>
+
+    </div>
+
+    <form id="formEditarFatura">
+
+      <input type="hidden" id="editarIdFatura">
+
+      <div class="campo-editar-fatura">
+        <label>Cartão</label>
+        <p id="editarNomeCartao"></p>
+      </div>
+
+      <div class="campo-editar-fatura">
+        <label>Referência</label>
+        <p id="editarReferenciaFatura"></p>
+      </div>
+
+      <div class="campo-editar-fatura">
+        <label for="editarVencimentoFatura">
+          Vencimento
+        </label>
+
+        <input type="date"
+               id="editarVencimentoFatura">
+      </div>
+
+      <div class="campo-editar-fatura">
+        <label for="editarSituacaoFatura">
+          Situação
+        </label>
+
+        <select id="editarSituacaoFatura" required>
+          <option value="Aberta">Aberta</option>
+          <option value="Fechada">Fechada</option>
+          <option value="Paga">Paga</option>
+        </select>
+      </div>
+
+      <div class="modal-cartao-acoes">
+
+        <button type="button"
+                id="btnCancelarEditarFatura">
+          Cancelar
+        </button>
+
+        <button type="submit"
+                id="btnSalvarEditarFatura">
+          Salvar alterações
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
   <!-- SCRIPTS -->
   <script src="https://accounts.google.com/gsi/client"
         defer></script>

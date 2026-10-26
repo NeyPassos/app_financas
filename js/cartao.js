@@ -106,14 +106,43 @@ function configurarEventosCartao() {
       window.location.href = "index.html";
     });
 
-  // FECHAR MODAL CARTÃO AO CLICAR FORA
-  document.getElementById("modalCartao")
-    .addEventListener("click", evento => {
+  
+/* ==========================================
+   FECHAR MODAL CARTÃO AO CLICAR FORA
+========================================== */
 
-      if (evento.target.id === "modalCartao") {
-        fecharModalCartao();
-      }
-    });
+document.getElementById("modalCartao")
+  .addEventListener("click", evento => {
+
+    if (evento.target.id === "modalCartao") {
+      fecharModalCartao();
+    }
+
+  });
+
+
+/* ==========================================
+   EVENTOS EDITAR FATURA
+========================================== */
+
+document.getElementById("formEditarFatura")
+  ?.addEventListener("submit", salvarEditarFatura);
+
+document.getElementById("btnFecharEditarFatura")
+  ?.addEventListener("click", fecharEditarFatura);
+
+document.getElementById("btnCancelarEditarFatura")
+  ?.addEventListener("click", fecharEditarFatura);
+
+document.getElementById("modalEditarFatura")
+  ?.addEventListener("click", evento => {
+
+    if (evento.target.id === "modalEditarFatura") {
+      fecharEditarFatura();
+    }
+
+  });
+
 
   /* ==========================================
      IMPORTAÇÃO DE FATURAS
@@ -188,7 +217,7 @@ function configurarEventosCartao() {
       fecharExcluirCartao();
       fecharModalImportacao();
       fecharConsultaFatura();
-
+      fecharEditarFatura();
     }
   });
 
@@ -1811,6 +1840,22 @@ function exibirFaturas() {
 
     acoes.appendChild(btnConsultar);
 
+        /* ==========================================
+      BOTÃO EDITAR FATURA
+    ========================================== */
+
+    const btnEditar = document.createElement("button");
+
+    btnEditar.type = "button";
+    btnEditar.textContent = "Editar";
+    btnEditar.className = "btn-editar";
+
+    btnEditar.addEventListener("click", () => {
+      abrirEditarFatura(fatura.id_fatura);
+    });
+
+    acoes.appendChild(btnEditar);
+
   });
 }
 
@@ -2100,3 +2145,139 @@ function formatarDataVencimento(valor) {
 
   return texto;
 }
+
+
+/* ==========================================
+   ABRIR MODAL EDITAR FATURA
+========================================== */
+
+function abrirEditarFatura(idFatura) {
+
+  const fatura = faturasCadastradas.find(
+    item => String(item.id_fatura) === String(idFatura)
+  );
+
+  if (!fatura) {
+    mostrarStatus("Fatura não encontrada.");
+    return;
+  }
+
+  const cartao = cartoesCadastrados.find(
+    item => String(item.id_cartao) === String(fatura.id_cartao)
+  );
+
+  const nomeCartao = cartao
+    ? cartao.banco + " - " + cartao.nome_cartao
+    : "Cartão " + fatura.id_cartao;
+
+  const referencia =
+    String(fatura.mes).padStart(2, "0") +
+    "/" + fatura.ano;
+
+  document.getElementById(
+    "editarIdFatura"
+  ).value = fatura.id_fatura;
+
+  document.getElementById(
+    "editarNomeCartao"
+  ).textContent = nomeCartao;
+
+  document.getElementById(
+    "editarReferenciaFatura"
+  ).textContent = referencia;
+
+  const vencimento = String(
+    fatura.vencimento || ""
+  ).trim();
+
+  document.getElementById(
+    "editarVencimentoFatura"
+  ).value = /^\d{4}-\d{2}-\d{2}$/.test(vencimento)
+    ? vencimento
+    : "";
+
+  document.getElementById(
+    "editarSituacaoFatura"
+  ).value = fatura.situacao || "Aberta";
+
+  document.getElementById(
+    "modalEditarFatura"
+  ).hidden = false;
+}
+
+
+/* ==========================================
+   FECHAR MODAL EDITAR FATURA
+========================================== */
+
+function fecharEditarFatura() {
+
+  document.getElementById(
+    "modalEditarFatura"
+  ).hidden = true;
+
+}
+
+
+/* ==========================================
+   SALVAR EDIÇÃO DA FATURA
+========================================== */
+
+async function salvarEditarFatura(evento) {
+
+  evento.preventDefault();
+
+  const botao = document.getElementById(
+    "btnSalvarEditarFatura"
+  );
+
+  if (botao.disabled) return;
+
+  const dados = {
+
+    id_fatura: document.getElementById(
+      "editarIdFatura"
+    ).value,
+
+    vencimento: document.getElementById(
+      "editarVencimentoFatura"
+    ).value,
+
+    situacao: document.getElementById(
+      "editarSituacaoFatura"
+    ).value
+
+  };
+
+  try {
+
+    botao.disabled = true;
+    botao.textContent = "Salvando...";
+
+    await apiEditarFatura(dados);
+
+    // Recarregar os dados atualizados.
+    await carregarFaturas();
+
+    fecharEditarFatura();
+
+    mostrarStatus(
+      "Fatura atualizada com sucesso."
+    );
+
+  } catch (erro) {
+
+    console.error("Erro ao editar fatura:", erro);
+
+    mostrarStatus(
+      "Erro ao editar fatura: " + erro.message
+    );
+
+  } finally {
+
+    botao.disabled = false;
+    botao.textContent = "Salvar alterações";
+
+  }
+}
+

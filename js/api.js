@@ -119,6 +119,19 @@ async function apiListarFaturas() {
   return executarAPI("listarFaturas");
 }
 
+/* ==========================================
+   EDITAR FATURA
+========================================== */
+
+async function apiEditarFatura(dados) {
+
+  return executarAPI(
+    "editarFatura",
+    [dados]
+  );
+
+}
+
 async function apiListarLancamentosCartao(idFatura) {
   return executarAPI(
     "listarLancamentosCartao",
