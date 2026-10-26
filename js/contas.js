@@ -810,6 +810,16 @@ async function marcarPago(conta) {
 
 }
 
+/* ==========================================
+   NAVEGAR PARA DASHBOARD
+========================================== */
+
+function abrirPaginaInicial() {
+
+    // Navegar sem encerrar a sessão Google.
+    window.location.href = "index.html";
+
+}
 
 /* ==========================================
    NAVEGAÇÃO ENTRE MÓDULOS
@@ -868,6 +878,14 @@ window.addEventListener("load", () => {
         }
     );
 
+    /* ======================================
+     BOTÃO INÍCIO - DASHBOARD
+    ====================================== */
+
+    el("btnInicio")?.addEventListener(
+        "click",
+        abrirPaginaInicial
+    );
 
     /* ======================================
        BOTÃO CARTÕES
