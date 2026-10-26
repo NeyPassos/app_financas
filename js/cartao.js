@@ -900,14 +900,7 @@ async function analisarArquivoFatura(evento) {
       extensao === "pdf" &&
       /bradesco/i.test(cartaoDaPrevia?.banco || "");
 
-    btnConfirmar.disabled = ehBradesco;
-
-    if (ehBradesco) {
-      mostrarStatus(
-        "Prévia Bradesco gerada. Confira os lançamentos. " +
-        "A confirmação está temporariamente bloqueada."
-      );
-    }
+    btnConfirmar.disabled = false;
 
     mostrarStatus(
       registros.length +
@@ -1520,8 +1513,8 @@ async function lerPDFFaturaBradesco(arquivo) {
     }
 
     // Parcelas, por exemplo: 08/12.
-    const resultadoParcela = descricaoOriginal.match(
-      /(?:^|\s)(\d{2})\/(\d{2})(?=\s|$)/
+   const resultadoParcela = descricaoOriginal.match(
+      /(\d{2})\/(\d{2})(?=\s|$)/
     );
 
     const parcelaAtual = resultadoParcela
@@ -1542,7 +1535,7 @@ async function lerPDFFaturaBradesco(arquivo) {
     }
 
     const descricao = descricaoOriginal
-      .replace(/(?:^|\s)\d{2}\/\d{2}(?=\s|$)/, " ")
+      .replace(/\d{2}\/\d{2}(?=\s|$)/, " ")
       .replace(/\s+/g, " ")
       .trim();
 
@@ -1867,22 +1860,6 @@ async function confirmarImportacaoFatura() {
 
   if (importandoFatura) return;
 
-  const cartaoConfirmacao = cartoesCadastrados.find(
-  cartao =>
-    String(cartao.id_cartao) ===
-    String(document.getElementById("importarCartao").value)
-  );
-
-if (
-  arquivoImportacao?.name.toLowerCase().endsWith(".pdf") &&
-  /bradesco/i.test(cartaoConfirmacao?.banco || "")
-) {
-  mostrarStatus(
-    "A importação Bradesco será liberada após validar a prévia."
-  );
-  return;
-}
-
   const idCartao = document.getElementById(
     "importarCartao"
   ).value;
@@ -1920,10 +1897,27 @@ if (
   }
 
   
+const cartaoSelecionado = cartoesCadastrados.find(
+  cartao => String(cartao.id_cartao) === String(idCartao)
+);
+
+const ehPDF = arquivoImportacao.name
+  .toLowerCase()
+  .endsWith(".pdf");
+
+const ehBradesco = /bradesco/i.test(
+  cartaoSelecionado?.banco || ""
+);
+
 const dados = {
   id_cartao: idCartao,
   mes: mes,
   ano: ano,
+
+  tipo_fatura:
+    ehPDF && ehBradesco
+      ? "fechada"
+      : "",
 
   arquivo_origem: arquivoImportacao.name,
 
