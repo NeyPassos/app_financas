@@ -826,8 +826,38 @@ async function analisarArquivoFatura(evento) {
       registros = lerCSVFatura(conteudo);
 
     } else {
+      
+      const cartaoSelecionado = cartoesCadastrados.find(
+        cartao =>
+          String(cartao.id_cartao) === String(idCartao)
+      );
 
-      const resultadoPDF = await lerPDFFaturaNubank(arquivo);
+      if (!cartaoSelecionado) {
+        throw new Error("Cartão selecionado não encontrado.");
+      }
+
+      const banco = String(cartaoSelecionado.banco || "")
+        .trim()
+        .toLowerCase();
+
+      let resultadoPDF;
+
+      if (banco.includes("nubank")) {
+
+        resultadoPDF = await lerPDFFaturaNubank(arquivo);
+
+      } else if (banco.includes("bradesco")) {
+
+        resultadoPDF = await lerPDFFaturaBradesco(arquivo);
+
+      } else {
+
+        throw new Error(
+          "Importação de PDF ainda não disponível para o banco " +
+          cartaoSelecionado.banco
+        );
+
+    }
 
       dadosOficiaisImportacao = {
       vencimento: resultadoPDF.vencimento,
@@ -862,7 +892,22 @@ async function analisarArquivoFatura(evento) {
 
     exibirPreviaFatura(registros);
 
-    btnConfirmar.disabled = false;
+    const cartaoDaPrevia = cartoesCadastrados.find(
+      cartao => String(cartao.id_cartao) === String(idCartao)
+    );
+
+    const ehBradesco =
+      extensao === "pdf" &&
+      /bradesco/i.test(cartaoDaPrevia?.banco || "");
+
+    btnConfirmar.disabled = ehBradesco;
+
+    if (ehBradesco) {
+      mostrarStatus(
+        "Prévia Bradesco gerada. Confira os lançamentos. " +
+        "A confirmação está temporariamente bloqueada."
+      );
+    }
 
     mostrarStatus(
       registros.length +
@@ -1280,6 +1325,310 @@ async function lerPDFFaturaNubank(arquivo) {
 
 
 /* ==========================================
+   LER PDF DE FATURA FECHADA BRADESCO
+========================================== */
+
+async function lerPDFFaturaBradesco(arquivo) {
+
+  const paginas = await extrairLinhasPDF(arquivo);
+
+  const textoGeral = paginas.flat().join("\n");
+
+  // Confirmar o formato do documento.
+  if (
+    !/Fatura Mensal/i.test(textoGeral) ||
+    !/Resumo da fatura/i.test(textoGeral)
+  ) {
+    throw new Error(
+      "O arquivo não parece ser uma fatura mensal fechada do Bradesco."
+    );
+  }
+
+  /* ==========================================
+     IDENTIFICAR VENCIMENTO
+  ========================================== */
+
+  const resultadoVencimento = textoGeral.match(
+    /Total de fatura\s+Vencimento[\s\S]*?R\$\s*[\d.,]+\s+(\d{2}\/\d{2}\/\d{4})/i
+  );
+
+  if (!resultadoVencimento) {
+    throw new Error(
+      "Não foi possível identificar o vencimento da fatura Bradesco."
+    );
+  }
+
+  const [dia, mes, ano] = resultadoVencimento[1]
+    .split("/")
+    .map(Number);
+
+  const dataValidada = new Date(
+    Date.UTC(ano, mes - 1, dia)
+  );
+
+  if (
+    dataValidada.getUTCFullYear() !== ano ||
+    dataValidada.getUTCMonth() !== mes - 1 ||
+    dataValidada.getUTCDate() !== dia
+  ) {
+    throw new Error("Vencimento inválido no PDF.");
+  }
+
+  const vencimento =
+    ano + "-" +
+    String(mes).padStart(2, "0") + "-" +
+    String(dia).padStart(2, "0");
+
+  /* ==========================================
+     VALOR OFICIAL
+  ========================================== */
+
+  const resultadoTotal = textoGeral.match(
+    /Resumo da fatura[\s\S]*?\(=\)\s*Total[.\s]*R\$\s*([\d.,]+)/i
+  );
+
+  if (!resultadoTotal) {
+    throw new Error(
+      "Não foi possível identificar o total oficial da fatura."
+    );
+  }
+
+  const valorOficial = converterValorFatura(
+    resultadoTotal[1]
+  );
+
+  if (
+    !Number.isFinite(valorOficial) ||
+    valorOficial < 0
+  ) {
+    throw new Error("Valor oficial inválido.");
+  }
+
+  /* ==========================================
+     LOCALIZAR LANÇAMENTOS
+  ========================================== */
+
+  const paginaLancamentos = paginas.find(
+    pagina => pagina.some(
+      linha => /Histórico de Lançamentos/i.test(linha)
+    )
+  );
+
+  if (!paginaLancamentos) {
+    throw new Error(
+      "A tabela de lançamentos não foi encontrada."
+    );
+  }
+
+  const lancamentos = [];
+  let naTabela = false;
+  let encontrouTotalFinal = false;
+  let cartaoAtual = "";
+
+  for (const linhaOriginal of paginaLancamentos) {
+
+    const linha = String(linhaOriginal)
+      .replace(/\u00a0/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (/Histórico de Lançamentos/i.test(linha)) {
+      naTabela = true;
+      continue;
+    }
+
+    if (!naTabela) continue;
+
+    // Fim da tabela de movimentos.
+    if (/^Total da fatura em real\b/i.test(linha)) {
+      encontrouTotalFinal = true;
+      break;
+    }
+
+    // Identificar os cartões físicos.
+    const identificacaoCartao = linha.match(
+      /Cartão\s+(?:\d{4}\s+)?X{4}\s+X{4}\s+(\d{4})/i
+    );
+
+    if (identificacaoCartao) {
+      cartaoAtual = identificacaoCartao[1];
+      continue;
+    }
+
+    // Ignorar linhas que não começam com uma data DD/MM.
+    const resultadoData = linha.match(
+      /^(\d{2})\/(\d{2})\s+(.+)$/
+    );
+
+    if (!resultadoData) continue;
+
+    const diaCompra = Number(resultadoData[1]);
+    const mesCompra = Number(resultadoData[2]);
+    const restante = resultadoData[3];
+
+    // Primeiro valor monetário da linha da transação.
+    const resultadoValor = restante.match(
+      /(\d{1,3}(?:\.\d{3})*,\d{2})(\s*-)/
+    ) || restante.match(
+      /(\d{1,3}(?:\.\d{3})*,\d{2})/
+    );
+
+    if (!resultadoValor) continue;
+
+    const descricaoOriginal = restante
+      .slice(0, resultadoValor.index)
+      .trim();
+
+    if (!descricaoOriginal) {
+      throw new Error(
+        "Descrição ausente na transação: " + linha
+      );
+    }
+
+    const pagamento = /\s*-$/.test(
+      resultadoValor[0]
+    );
+
+    const valorLido = converterValorFatura(
+      resultadoValor[1]
+    );
+
+    const valor = pagamento
+      ? -Math.abs(valorLido)
+      : valorLido;
+
+    // Compras da fatura podem ter ocorrido
+    // no ano anterior ao vencimento.
+    let anoCompra = ano;
+
+    if (mesCompra > mes) {
+      anoCompra--;
+    }
+
+    const dataCompra = new Date(
+      Date.UTC(anoCompra, mesCompra - 1, diaCompra)
+    );
+
+    if (
+      dataCompra.getUTCFullYear() !== anoCompra ||
+      dataCompra.getUTCMonth() !== mesCompra - 1 ||
+      dataCompra.getUTCDate() !== diaCompra
+    ) {
+      throw new Error(
+        "Data de lançamento inválida: " + linha
+      );
+    }
+
+    // Parcelas, por exemplo: 08/12.
+    const resultadoParcela = descricaoOriginal.match(
+      /(?:^|\s)(\d{2})\/(\d{2})(?=\s|$)/
+    );
+
+    const parcelaAtual = resultadoParcela
+      ? Number(resultadoParcela[1])
+      : 1;
+
+    const totalParcelas = resultadoParcela
+      ? Number(resultadoParcela[2])
+      : 1;
+
+    if (
+      parcelaAtual < 1 ||
+      totalParcelas < parcelaAtual
+    ) {
+      throw new Error(
+        "Parcelamento inválido: " + linha
+      );
+    }
+
+    const descricao = descricaoOriginal
+      .replace(/(?:^|\s)\d{2}\/\d{2}(?=\s|$)/, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    const tipoMovimento = pagamento
+      ? "Pagamento"
+      : /\bIOF\b|juros|multa/i.test(descricao)
+        ? "Encargo"
+        : "Compra";
+
+    lancamentos.push({
+
+      data_compra:
+        anoCompra + "-" +
+        String(mesCompra).padStart(2, "0") + "-" +
+        String(diaCompra).padStart(2, "0"),
+
+      descricao:
+        descricao +
+        (cartaoAtual ? " [Cartão " + cartaoAtual + "]" : ""),
+
+      parcela_atual: parcelaAtual,
+      total_parcelas: totalParcelas,
+      valor,
+      tipo_movimento: tipoMovimento
+
+    });
+
+  }
+
+  if (!encontrouTotalFinal) {
+    throw new Error(
+      "Não foi encontrado o total final da tabela de lançamentos."
+    );
+  }
+
+  if (!lancamentos.length) {
+    throw new Error(
+      "Nenhum lançamento identificado no PDF Bradesco."
+    );
+  }
+
+  /* ==========================================
+     CONFERIR COM O TOTAL OFICIAL
+  ========================================== */
+
+  const totalCompras = lancamentos
+    .filter(item => item.valor >= 0)
+    .reduce((total, item) => total + item.valor, 0);
+
+  const totalCentavos = Math.round(
+    totalCompras * 100
+  );
+
+  const oficialCentavos = Math.round(
+    valorOficial * 100
+  );
+
+  if (totalCentavos !== oficialCentavos) {
+    throw new Error(
+      "O total das compras identificadas não confere " +
+      "com o valor oficial da fatura. " +
+      "Identificado: R$ " +
+      totalCompras.toFixed(2) +
+      " | Oficial: R$ " +
+      valorOficial.toFixed(2)
+    );
+  }
+
+  console.log("Bradesco - PDF analisado:", {
+    vencimento,
+    valorOficial,
+    lancamentos: lancamentos.length,
+    totalCompras
+  });
+
+  return {
+    mes,
+    ano,
+    vencimento,
+    valorOficial,
+    lancamentos
+  };
+
+}
+
+/* ==========================================
    INTERPRETAR CSV DO NUBANK
 ========================================== */
 
@@ -1517,6 +1866,22 @@ function preencherFiltrosFaturas() {
 async function confirmarImportacaoFatura() {
 
   if (importandoFatura) return;
+
+  const cartaoConfirmacao = cartoesCadastrados.find(
+  cartao =>
+    String(cartao.id_cartao) ===
+    String(document.getElementById("importarCartao").value)
+  );
+
+if (
+  arquivoImportacao?.name.toLowerCase().endsWith(".pdf") &&
+  /bradesco/i.test(cartaoConfirmacao?.banco || "")
+) {
+  mostrarStatus(
+    "A importação Bradesco será liberada após validar a prévia."
+  );
+  return;
+}
 
   const idCartao = document.getElementById(
     "importarCartao"
