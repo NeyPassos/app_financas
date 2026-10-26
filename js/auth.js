@@ -142,12 +142,37 @@ function iniciarAutenticacao() {
 
     }
 
+  
   });
 
   autenticacaoInicializada = true;
 
- 
+  // Recuperar sessão ao navegar entre páginas.
+  if (recuperarSessaoGoogle()) {
+
+    atualizarBotoesAutenticacao();
+
+    carregarModuloAtual().catch(erro => {
+
+      console.error(
+        "Erro ao carregar módulo:",
+        erro
+      );
+
+      mostrarStatus(
+        "Erro ao recuperar sessão: " + erro.message
+      );
+
+    });
+
+  } else {
+
+    atualizarBotoesAutenticacao();
+
+  }
+
 }
+
 
 /* ==========================================
    ENTRAR COM GOOGLE
@@ -164,16 +189,30 @@ function entrarGoogle() {
     return;
   }
 
+  // Se já existir uma sessão válida, reutilizar.
   if (recuperarSessaoGoogle()) {
 
     atualizarBotoesAutenticacao();
 
     carregarModuloAtual().catch(erro => {
-      console.error("Erro ao recuperar sessão:", erro);
+
+      console.error(
+        "Erro ao recuperar sessão:",
+        erro
+      );
+
       mostrarStatus(erro.message);
+
     });
 
+    return;
   }
+
+  // Sem sessão válida: solicitar login ao Google.
+  tokenClient.requestAccessToken({
+    prompt: "select_account"
+  });
+
 }
 
 /* ==========================================
@@ -271,8 +310,6 @@ function sairGoogle() {
 
     google.accounts.oauth2.revoke(accessToken);
   }
-
-  accessToken = null;
 
   accessToken = null;
 
