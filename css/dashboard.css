@@ -101,8 +101,11 @@ header {
 /* Botões de autenticação no canto superior direito */
 header .acoes-login {
     position: absolute;
-    top: 20px;
+
+    top: 32px;
     right: 30px;
+
+    transform: translateY(-50%);
 
     display: flex;
     align-items: center;
@@ -147,6 +150,7 @@ header .acoes-login button[hidden] {
         top: auto;
         bottom: 15px;
         right: 20px;
+        transform: none;
     }
 
 }
