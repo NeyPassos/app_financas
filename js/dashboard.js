@@ -125,30 +125,40 @@ function renderizarDashboard() {
             ""
         ).trim();
 
-        const totalParcelas = Number(
-            compra.total_parcelas || 0
-        );
+        c
+      /* ==================================
+        PARCELA ATUAL E RESTANTES
+      ================================== */
 
-        const restantes = Number(
-            compra.parcelas_restantes || 0
-        );
+      const parcelaAtual = Number(
+          compra.parcela_atual || 0
+      );
 
-        const valores = [
-            banco,
-            descricao,
-            `${totalParcelas}/${restantes}`
-        ];
+      const totalParcelas = Number(
+          compra.total_parcelas || 0
+      );
 
-        valores.forEach(valor => {
+      const restantes = Number(
+          compra.parcelas_restantes || 0
+      );
 
-            const coluna = linha.insertCell();
+      const parcelas =
+          `${parcelaAtual}/${totalParcelas}`;
 
-            coluna.textContent = valor;
+      /* ==================================
+        CRIAR COLUNAS
+      ================================== */
+
+      const valores = [
+          banco,
+          descricao,
+          parcelas,
+          restantes
+      ];
 
         });
 
-    });
-
+    
     /* ======================================
        LISTA VAZIA
     ====================================== */
@@ -159,7 +169,7 @@ function renderizarDashboard() {
 
         const coluna = linha.insertCell();
 
-        coluna.colSpan = 3;
+        coluna.colSpan = 4;
 
         coluna.textContent =
             "Nenhuma compra parcelada encontrada.";

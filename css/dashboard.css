@@ -161,9 +161,8 @@ header nav {
 
 }
 
-
 /* ==========================================
-   DASHBOARD - TABELA SIMPLIFICADA
+   DASHBOARD - TABELA COM 4 COLUNAS
 ========================================== */
 
 .painel-parcelamentos table {
@@ -175,20 +174,27 @@ header nav {
 /* Cartão */
 .painel-parcelamentos th:nth-child(1),
 .painel-parcelamentos td:nth-child(1) {
-    width: 20%;
+    width: 18%;
 }
 
-/* Descrição */
+/* Descrição da compra */
 .painel-parcelamentos th:nth-child(2),
 .painel-parcelamentos td:nth-child(2) {
-    width: 60%;
+    width: 52%;
     overflow-wrap: anywhere;
 }
 
-/* Parcelas */
+/* Parcela atual */
 .painel-parcelamentos th:nth-child(3),
 .painel-parcelamentos td:nth-child(3) {
-    width: 20%;
+    width: 15%;
+    text-align: center;
+}
+
+/* Parcelas restantes */
+.painel-parcelamentos th:nth-child(4),
+.painel-parcelamentos td:nth-child(4) {
+    width: 15%;
     text-align: center;
     font-weight: bold;
 }
