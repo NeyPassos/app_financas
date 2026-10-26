@@ -95,6 +95,17 @@ function configurarEventosCartao() {
     confirmarImportacaoFatura
   );
 
+    /* ==========================================
+      NAVEGAR PARA CONTAS
+    ========================================== */
+
+    document.getElementById("btnContas")
+      ?.addEventListener("click", () => {
+
+        window.location.href = "contas.html";
+
+      });
+
   // SAIR
   document.getElementById("btnSair")
     .addEventListener("click", () => {
