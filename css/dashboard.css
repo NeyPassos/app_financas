@@ -90,70 +90,77 @@
 
 
 /* ==========================================
-   DASHBOARD - CABEÇALHO E AUTENTICAÇÃO
+   DASHBOARD - CABEÇALHO
 ========================================== */
 
-/* Cabeçalho */
-header {
-    position: relative;
+header .topo-linha {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
 }
 
-/* Botões de autenticação no canto superior direito */
+header .topo-linha h1 {
+    margin: 0;
+}
+
+/* ==========================================
+   BOTÕES ENTRAR / SAIR
+========================================== */
+
 header .acoes-login {
-    position: absolute;
-
-    top: 32px;
-    right: 30px;
-
-    transform: translateY(-50%);
+    position: static;
+    transform: none;
 
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-/* Padronizar botões */
 header .acoes-login button {
     padding: 10px 18px;
-
     background: #ffffff;
     color: #1d3154;
-
     border: 1px solid #ffffff;
     border-radius: 6px;
-
     font-size: 14px;
     font-weight: 500;
-
     cursor: pointer;
 }
 
-/* Efeito ao passar o mouse */
 header .acoes-login button:hover {
     background: #e5eaf2;
 }
 
-/* Manter botões ocultos quando necessário */
 header .acoes-login button[hidden] {
     display: none !important;
 }
 
-/* Ajuste para telas menores */
+/* ==========================================
+   MENU DE NAVEGAÇÃO
+========================================== */
+
+header nav {
+    margin-top: 12px;
+}
+
+/* ==========================================
+   RESPONSIVIDADE
+========================================== */
+
 @media (max-width: 600px) {
 
-    header {
-        padding-right: 20px;
-        padding-bottom: 65px;
+    header .topo-linha {
+        flex-wrap: wrap;
+        gap: 12px;
     }
 
     header .acoes-login {
-        top: auto;
-        bottom: 15px;
-        right: 20px;
-        transform: none;
+        margin-left: auto;
     }
 
 }
+
 
 /* ==========================================
    DASHBOARD - TABELA SIMPLIFICADA
