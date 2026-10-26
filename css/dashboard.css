@@ -154,3 +154,34 @@ header .acoes-login button[hidden] {
     }
 
 }
+
+/* ==========================================
+   DASHBOARD - TABELA SIMPLIFICADA
+========================================== */
+
+.painel-parcelamentos table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+/* Cartão */
+.painel-parcelamentos th:nth-child(1),
+.painel-parcelamentos td:nth-child(1) {
+    width: 20%;
+}
+
+/* Descrição */
+.painel-parcelamentos th:nth-child(2),
+.painel-parcelamentos td:nth-child(2) {
+    width: 60%;
+    overflow-wrap: anywhere;
+}
+
+/* Parcelas */
+.painel-parcelamentos th:nth-child(3),
+.painel-parcelamentos td:nth-child(3) {
+    width: 20%;
+    text-align: center;
+    font-weight: bold;
+}

@@ -14,101 +14,131 @@ const elementoDashboard = id =>
 
 async function carregarDashboard() {
 
-  const tabela = elementoDashboard(
-    "listaParcelamentos"
-  );
+    const tabela = elementoDashboard(
+        "listaParcelamentos"
+    );
 
-  try {
+    try {
 
-    mostrarStatus("Carregando parcelamentos...");
+        mostrarStatus("Carregando parcelamentos...");
 
-    const resposta =
-      await apiListarParcelamentosDashboard();
+        const resposta =
+            await apiListarParcelamentosDashboard();
 
-    const compras = Array.isArray(resposta.dados)
-      ? resposta.dados
-      : [];
+        const compras = Array.isArray(resposta.dados)
+            ? resposta.dados
+            : [];
 
-    tabela.replaceChildren();
+        // Ordenar das que menos faltam
+        // para as que mais faltam.
+        compras.sort((a, b) =>
+            Number(a.parcelas_restantes) -
+            Number(b.parcelas_restantes)
+        );
 
-    let totalPagas = 0;
-    let totalRestantes = 0;
+        tabela.replaceChildren();
 
-    compras.forEach(compra => {
+        compras.forEach(compra => {
 
-      const pagas = Number(
-        compra.parcelas_pagas || 0
-      );
+            const linha = tabela.insertRow();
 
-      const restantes = Number(
-        compra.parcelas_restantes || 0
-      );
+            /* ==================================
+               NOME DO BANCO
+            ================================== */
 
-      totalPagas += pagas;
-      totalRestantes += restantes;
+            const nomeCompleto = String(
+                compra.cartao || ""
+            ).trim();
 
-      const linha = tabela.insertRow();
+            const banco = nomeCompleto
+                .split(" - ")[0]
+                .trim();
 
-      const valores = [
-        compra.cartao,
-        compra.descricao,
-        compra.parcela_atual,
-        compra.total_parcelas,
-        pagas,
-        restantes
-      ];
+            /* ==================================
+               DESCRIÇÃO SEM PARCELAMENTO
+            ================================== */
 
-      valores.forEach(valor => {
+            const descricao = String(
+                compra.descricao || ""
+            )
+            .replace(
+                /\s*[-–]?\s*parcela\s+\d+\s*\/\s*\d+\s*$/i,
+                ""
+            )
+            .trim();
 
-        const coluna = linha.insertCell();
+            /* ==================================
+               PARCELAS
+               TOTAL / RESTANTES
+            ================================== */
 
-        coluna.textContent = valor;
+            const total = Number(
+                compra.total_parcelas || 0
+            );
 
-      });
+            const restantes = Number(
+                compra.parcelas_restantes || 0
+            );
 
-    });
+            const parcelas = total + "/" + restantes;
 
-    elementoDashboard("totalCompras").textContent =
-      compras.length;
+            /* ==================================
+               PREENCHER TABELA
+            ================================== */
 
-    elementoDashboard("totalParcelasPagas").textContent =
-      totalPagas;
+            const valores = [
+                banco,
+                descricao,
+                parcelas
+            ];
 
-    elementoDashboard("totalParcelasRestantes").textContent =
-      totalRestantes;
+            valores.forEach(valor => {
 
-    if (!compras.length) {
+                const coluna = linha.insertCell();
 
-      const linha = tabela.insertRow();
-      const coluna = linha.insertCell();
+                coluna.textContent = valor;
 
-      coluna.colSpan = 6;
-      coluna.textContent =
-        "Nenhuma compra parcelada encontrada.";
+            });
+
+        });
+
+        /* ======================================
+           TABELA VAZIA
+        ====================================== */
+
+        if (!compras.length) {
+
+            const linha = tabela.insertRow();
+
+            const coluna = linha.insertCell();
+
+            coluna.colSpan = 3;
+
+            coluna.textContent =
+                "Nenhuma compra parcelada encontrada.";
+
+        }
+
+        mostrarStatus(
+            compras.length +
+            " compra(s) parcelada(s) encontrada(s)."
+        );
+
+    } catch (erro) {
+
+        console.error(
+            "Erro ao carregar Dashboard:",
+            erro
+        );
+
+        mostrarStatus(
+            "Erro ao carregar Dashboard: " +
+            erro.message
+        );
 
     }
 
-    mostrarStatus(
-      compras.length +
-      " compra(s) parcelada(s) encontrada(s)."
-    );
-
-  } catch (erro) {
-
-    console.error(
-      "Erro ao carregar Dashboard:",
-      erro
-    );
-
-    mostrarStatus(
-      "Erro ao carregar Dashboard: " +
-      erro.message
-    );
-
-  }
-
 }
-
 
 /* ==========================================
    INICIALIZAR DASHBOARD
