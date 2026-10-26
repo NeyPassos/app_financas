@@ -74,8 +74,17 @@ async function carregarDashboard() {
 function renderizarDashboard() {
 
     const tabela = elementoDashboard(
-        "listaParcelamentos"
+    "listaParcelamentos"
+);
+
+if (!tabela) {
+    console.error(
+        "Tabela listaParcelamentos não encontrada."
     );
+    return;
+}
+
+tabela.replaceChildren();
 
     tabela.replaceChildren();
 
@@ -120,44 +129,58 @@ function renderizarDashboard() {
             compra.descricao || ""
         ).trim();
 
+       
+        /* ==================================
+           LIMPAR DESCRIÇÃO
+        ================================== */
+
         descricao = descricao.replace(
             /\s*[-–]?\s*parcela\s*\d+\s*\/\s*\d+\s*$/i,
             ""
         ).trim();
 
-        c
-      /* ==================================
-        PARCELA ATUAL E RESTANTES
-      ================================== */
 
-      const parcelaAtual = Number(
-          compra.parcela_atual || 0
-      );
+        /* ==================================
+           PARCELA ATUAL E RESTANTES
+        ================================== */
 
-      const totalParcelas = Number(
-          compra.total_parcelas || 0
-      );
+        const parcelaAtual = Number(
+            compra.parcela_atual || 0
+        );
 
-      const restantes = Number(
-          compra.parcelas_restantes || 0
-      );
+        const totalParcelas = Number(
+            compra.total_parcelas || 0
+        );
 
-      const parcelas =
-          `${parcelaAtual}/${totalParcelas}`;
+        const restantes = Number(
+            compra.parcelas_restantes || 0
+        );
 
-      /* ==================================
-        CRIAR COLUNAS
-      ================================== */
+        const parcelas =
+            `${parcelaAtual}/${totalParcelas}`;
 
-      const valores = [
-          banco,
-          descricao,
-          parcelas,
-          restantes
-      ];
+
+        /* ==================================
+           CRIAR AS QUATRO COLUNAS
+        ================================== */
+
+        const valores = [
+            banco,
+            descricao,
+            parcelas,
+            restantes
+        ];
+
+        valores.forEach(valor => {
+
+            const coluna = linha.insertCell();
+
+            coluna.textContent = valor;
 
         });
 
+    });
+ 
     
     /* ======================================
        LISTA VAZIA
