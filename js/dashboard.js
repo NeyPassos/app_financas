@@ -36,10 +36,19 @@ async function carregarDashboard() {
             ? resposta.dados
             : [];
 
-        comprasDashboard.sort((a, b) =>
-            Number(a.parcelas_restantes) -
-            Number(b.parcelas_restantes)
-        );
+        comprasDashboard.sort((a, b) => {
+
+            const restantesA =
+                Number(a.total_parcelas) -
+                Number(a.parcela_atual);
+
+            const restantesB =
+                Number(b.total_parcelas) -
+                Number(b.parcela_atual);
+
+            return restantesA - restantesB;
+
+        });
 
         paginaAtualDashboard = 1;
 
@@ -139,9 +148,9 @@ tabela.replaceChildren();
             ""
         ).trim();
 
-
+        
         /* ==================================
-           PARCELA ATUAL E RESTANTES
+        PARCELA ATUAL E RESTANTES
         ================================== */
 
         const parcelaAtual = Number(
@@ -152,10 +161,13 @@ tabela.replaceChildren();
             compra.total_parcelas || 0
         );
 
-        const restantes = Number(
-            compra.parcelas_restantes || 0
+        /* Calcular parcelas restantes */
+        const restantes = Math.max(
+            0,
+            totalParcelas - parcelaAtual
         );
 
+        /* Exibir parcela atual / total */
         const parcelas =
             `${parcelaAtual}/${totalParcelas}`;
 
