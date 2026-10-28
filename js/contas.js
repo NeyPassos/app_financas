@@ -35,6 +35,8 @@ let contasFiltradas = [];
 
 let paginaAtual = 1;
 
+let filtrosIniciaisAplicados = false;
+
 let idEmEdicao = null;
 let idParaExcluir = null;
 
@@ -131,11 +133,17 @@ function criarBotao(texto, classe, acao) {
 }
 
 
+
 /* ==========================================
    PREENCHER FILTROS
 ========================================== */
 
 function popularFiltros() {
+
+    const hoje = new Date();
+
+    const anoAtual = String(hoje.getFullYear());
+    const mesAtual = MESES[hoje.getMonth()];
 
     const anos = [
         ...new Set(
@@ -144,43 +152,56 @@ function popularFiltros() {
     ].sort((a, b) => Number(b) - Number(a));
 
     const filtroAno = el("filtroAno");
+    const filtroMes = el("filtroMes");
 
+    // Preservar filtros escolhidos pelo usuário
     const anoSelecionado = filtroAno.value;
+    const mesSelecionado = filtroMes.value;
 
+    // Preencher anos
     filtroAno.replaceChildren(
         new Option("Todos", "")
     );
 
-    anos.forEach(ano => {
+    // Garantir que o ano atual esteja disponível
+    if (!anos.includes(anoAtual)) {
+        anos.push(anoAtual);
+        anos.sort((a, b) => Number(b) - Number(a));
+    }
 
+    anos.forEach(ano => {
         filtroAno.add(
             new Option(ano, ano)
         );
-
     });
 
-    filtroAno.value = anos.includes(anoSelecionado)
-        ? anoSelecionado
-        : "";
-
-
-    const filtroMes = el("filtroMes");
-
-    const mesSelecionado = filtroMes.value;
-
+    // Preencher meses
     filtroMes.replaceChildren(
         new Option("Todos", "")
     );
 
     MESES.forEach(mes => {
-
         filtroMes.add(
             new Option(mes, mes)
         );
-
     });
 
-    filtroMes.value = mesSelecionado;
+    // Selecionar mês e ano atuais somente
+    // no primeiro carregamento
+    if (!filtrosIniciaisAplicados) {
+
+        filtroAno.value = anoAtual;
+        filtroMes.value = mesAtual;
+
+        filtrosIniciaisAplicados = true;
+
+    } else {
+
+        // Manter seleção nas atualizações
+        filtroAno.value = anoSelecionado;
+        filtroMes.value = mesSelecionado;
+
+    }
 
 }
 
