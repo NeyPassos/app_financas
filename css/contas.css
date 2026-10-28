@@ -386,3 +386,82 @@ td.acoes .btn {
         align-items: flex-start;
     }
 }
+
+/* ==========================================
+   DISTRIBUIÇÃO DAS COLUNAS - CONTAS
+========================================== */
+
+/* Definir proporções da tabela */
+table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+/* ID */
+th:nth-child(1),
+td:nth-child(1) {
+    width: 4%;
+}
+
+/* Vencimento */
+th:nth-child(2),
+td:nth-child(2) {
+    width: 12%;
+}
+
+/* Conta */
+th:nth-child(3),
+td:nth-child(3) {
+    width: 29%;
+}
+
+/* Parcela */
+th:nth-child(4),
+td:nth-child(4) {
+    width: 9%;
+}
+
+/* Valor */
+th:nth-child(5),
+td:nth-child(5) {
+    width: 12%;
+}
+
+/* Situação */
+th:nth-child(6),
+td:nth-child(6) {
+    width: 12%;
+}
+
+/* Ações */
+th:nth-child(7),
+td:nth-child(7) {
+    width: 22%;
+}
+
+/* Alinhamento dos dados */
+th:nth-child(4),
+td:nth-child(4),
+th:nth-child(5),
+td:nth-child(5),
+th:nth-child(6),
+td:nth-child(6) {
+    text-align: center;
+}
+
+/* Ações à direita */
+th:nth-child(7) {
+    text-align: center;
+    padding-right: 9px;
+}
+
+td.acoes {
+    text-align: right;
+    padding-right: 15px;
+    white-space: nowrap;
+}
+
+/* Evitar que nomes grandes ultrapassem a coluna */
+td:nth-child(3) {
+    overflow-wrap: break-word;
+}
