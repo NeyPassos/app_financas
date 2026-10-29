@@ -32,9 +32,35 @@ async function carregarDashboard() {
         const resposta =
             await apiListarParcelamentosDashboard();
 
-        comprasDashboard = Array.isArray(resposta.dados)
+        
+        /* ==========================================
+        FILTRAR COMPRAS COM PARCELAS RESTANTES
+        ========================================== */
+
+        const todasCompras = Array.isArray(resposta.dados)
             ? resposta.dados
             : [];
+
+        comprasDashboard = todasCompras.filter(compra => {
+
+            const parcelaAtual = Number(
+                compra.parcela_atual || 0
+            );
+
+            const totalParcelas = Number(
+                compra.total_parcelas || 0
+            );
+
+            const restantes =
+                totalParcelas - parcelaAtual;
+
+            return (
+                parcelaAtual > 0 &&
+                totalParcelas > 0 &&
+                restantes > 0
+            );
+
+        });
 
         comprasDashboard.sort((a, b) => {
 
