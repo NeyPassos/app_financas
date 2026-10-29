@@ -202,12 +202,26 @@ tabela.replaceChildren();
            CRIAR AS QUATRO COLUNAS
         ================================== */
 
+        
+        const valorParcela = Number(
+            compra.valor_parcela
+        );
+
+        const valorFormatado = Number.isFinite(valorParcela)
+            ? valorParcela.toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL"
+            })
+            : "-";
+
         const valores = [
             banco,
             descricao,
             parcelas,
+            valorFormatado,
             restantes
         ];
+
 
         valores.forEach(valor => {
 
@@ -230,7 +244,7 @@ tabela.replaceChildren();
 
         const coluna = linha.insertCell();
 
-        coluna.colSpan = 4;
+        coluna.colSpan = 5;
 
         coluna.textContent =
             "Nenhuma compra parcelada encontrada.";
