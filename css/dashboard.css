@@ -264,3 +264,84 @@ header nav {
     }
 
 }
+
+
+/* ==========================================
+   DASHBOARD - TABELA SEM SCROLL HORIZONTAL
+========================================== */
+
+.painel-parcelamentos {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+/* Container da tabela */
+.painel-parcelamentos .tabela-rolagem {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+
+/* Tabela de parcelamentos */
+#tabelaParcelamentos {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+/* Células e cabeçalhos */
+#tabelaParcelamentos th,
+#tabelaParcelamentos td {
+    padding: 12px 8px;
+    box-sizing: border-box;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    vertical-align: middle;
+}
+
+/* Cartão */
+#tabelaParcelamentos th:nth-child(1),
+#tabelaParcelamentos td:nth-child(1) {
+    width: 12%;
+    text-align: left;
+}
+
+/* Descrição da compra */
+#tabelaParcelamentos th:nth-child(2),
+#tabelaParcelamentos td:nth-child(2) {
+    width: 43%;
+    text-align: left;
+}
+
+/* Parcelas */
+#tabelaParcelamentos th:nth-child(3),
+#tabelaParcelamentos td:nth-child(3) {
+    width: 12%;
+    text-align: center;
+}
+
+/* Valor da parcela */
+#tabelaParcelamentos th:nth-child(4),
+#tabelaParcelamentos td:nth-child(4) {
+    width: 21%;
+    text-align: right;
+}
+
+/* Restantes */
+#tabelaParcelamentos th:nth-child(5),
+#tabelaParcelamentos td:nth-child(5) {
+    width: 12%;
+    text-align: center;
+}
+
+/* Destacar valores */
+#tabelaParcelamentos td:nth-child(4),
+#tabelaParcelamentos td:nth-child(5) {
+    font-weight: 600;
+}
+
