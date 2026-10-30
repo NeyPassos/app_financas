@@ -115,6 +115,19 @@ async function apiCadastrarCartao(dados) {
   return executarAPI("cadastrarCartao", [dados]);
 }
 
+/* ==========================================
+   EDITAR CARTÃO
+========================================== */
+
+async function apiEditarCartao(dados) {
+
+    return executarAPI(
+        "editarCartao",
+        [dados]
+    );
+
+}
+
 async function apiListarFaturas() {
   return executarAPI("listarFaturas");
 }
