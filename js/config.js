@@ -12,9 +12,11 @@ const CONFIG = Object.freeze({
   API_URL:
     "https://script.googleapis.com/v1/scripts/",
 
-  SCOPES: [
-    "https://www.googleapis.com/auth/spreadsheets.currentonly",
-    "https://www.googleapis.com/auth/userinfo.email"
-  ].join(" ")
+  
+    SCOPES: [
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/userinfo.email"
+    ].join(" ")
+
 
 });
