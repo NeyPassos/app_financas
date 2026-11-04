@@ -465,3 +465,71 @@ td.acoes {
 td:nth-child(3) {
     overflow-wrap: break-word;
 }
+
+
+/* ==========================================
+   CONTAS - DISTRIBUIÇÃO DAS COLUNAS
+========================================== */
+
+#listaContas {
+    width: 100%;
+}
+
+/* Tabela de contas */
+.tabela-rolagem table {
+    width: 100%;
+    min-width: 900px;
+    table-layout: fixed;
+}
+
+/* Alinhamento geral */
+.tabela-rolagem th,
+.tabela-rolagem td {
+    padding: 12px 10px;
+    vertical-align: middle;
+}
+
+/* 1 - Vencimento */
+.tabela-rolagem th:nth-child(1),
+.tabela-rolagem td:nth-child(1) {
+    width: 13%;
+    white-space: nowrap;
+}
+
+/* 2 - Conta */
+.tabela-rolagem th:nth-child(2),
+.tabela-rolagem td:nth-child(2) {
+    width: 29%;
+    white-space: normal;
+    overflow-wrap: break-word;
+}
+
+/* 3 - Parcela */
+.tabela-rolagem th:nth-child(3),
+.tabela-rolagem td:nth-child(3) {
+    width: 10%;
+    text-align: center;
+}
+
+/* 4 - Valor */
+.tabela-rolagem th:nth-child(4),
+.tabela-rolagem td:nth-child(4) {
+    width: 15%;
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* 5 - Situação */
+.tabela-rolagem th:nth-child(5),
+.tabela-rolagem td:nth-child(5) {
+    width: 12%;
+    text-align: center;
+}
+
+/* 6 - Ações */
+.tabela-rolagem th:nth-child(6),
+.tabela-rolagem td:nth-child(6) {
+    width: 21%;
+    text-align: right;
+    white-space: nowrap;
+}
