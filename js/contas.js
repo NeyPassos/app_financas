@@ -255,6 +255,36 @@ function aplicarFiltros() {
 
     });
 
+    
+        /* ======================================
+        ORDENAR POR DATA DE VENCIMENTO
+        ORDEM CRESCENTE
+        ====================================== */
+
+        contasFiltradas.sort((a, b) => {
+
+            const mesA = MESES.findIndex(
+                mes => normalizar(mes) === normalizar(a.mes)
+            ) + 1;
+
+            const mesB = MESES.findIndex(
+                mes => normalizar(mes) === normalizar(b.mes)
+            ) + 1;
+
+            const dataA =
+                Number(a.ano) * 10000 +
+                mesA * 100 +
+                Number(a.dia);
+
+            const dataB =
+                Number(b.ano) * 10000 +
+                mesB * 100 +
+                Number(b.dia);
+
+            return dataA - dataB;
+
+        });
+
 
     /* ======================================
        RESUMOS FINANCEIROS
@@ -340,7 +370,7 @@ function renderizarTabela() {
 
         const coluna = linha.insertCell();
 
-        coluna.colSpan = 7;
+        coluna.colSpan = 6;
 
         coluna.className = "vazio";
 
@@ -359,7 +389,6 @@ function renderizarTabela() {
         const linha = tbody.insertRow();
 
         const valores = [
-            conta.id_conta,
             dataConta(conta),
             conta.tipo_conta,
             conta.parcela || "—",
