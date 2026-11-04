@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Contas a Pagar | App Finanças</title>
-  <link rel="stylesheet" href="css/contas.css?v=4">
+  <link rel="stylesheet" href="css/contas.css?v=6">
 </head>
 
 <body>
@@ -30,9 +30,33 @@
       <article><span>Registros</span><strong id="resumoQuantidade">0</strong></article>
     </section>
     <section class="painel">
+      
       <div class="barra">
-        <h2>Minhas contas</h2><button class="btn btn-primario" id="btnNova" type="button" disabled>+ Nova conta</button>
+
+        <h2>Minhas contas</h2>
+
+        <div class="acoes-contas">
+
+          <button
+            class="btn btn-neutro"
+            id="btnDuplicarContas"
+            type="button"
+            disabled>
+            Duplicar contas
+          </button>
+
+          <button
+            class="btn btn-primario"
+            id="btnNova"
+            type="button"
+            disabled>
+            + Nova conta
+          </button>
+
+        </div>
+
       </div>
+
       <div class="filtros"><label>Pesquisar<input id="pesquisa" type="search"
             placeholder="Conta, parcela ou situação"></label><label>Ano<select id="filtroAno">
             <option value="">Todos</option>
@@ -68,6 +92,72 @@
       </div>
     </section>
   </main>
+  
+<!-- MODAL DUPLICAR CONTAS -->
+
+<div class="modal" id="modalDuplicarContas" hidden>
+
+  <div class="janela janela-pequena"
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="tituloDuplicarContas">
+
+    <div class="modal-topo">
+      <h2 id="tituloDuplicarContas">
+        Duplicar contas
+      </h2>
+
+      <button
+        class="fechar"
+        id="fecharDuplicarContas"
+        type="button"
+        aria-label="Fechar">
+        ×
+      </button>
+    </div>
+
+    <p id="periodoOrigemDuplicacao"></p>
+
+    <div class="campos">
+
+      <label>
+        Ano de destino
+        <input
+          id="anoDestinoDuplicacao"
+          type="number"
+          min="1900"
+          max="9999">
+      </label>
+
+      <label>
+        Mês de destino
+        <select id="mesDestinoDuplicacao"></select>
+      </label>
+
+    </div>
+
+    <div class="modal-acoes">
+
+      <button
+        type="button"
+        class="btn btn-neutro"
+        id="cancelarDuplicarContas">
+        Cancelar
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primario"
+        id="confirmarDuplicarContas">
+        Duplicar contas
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
   <div class="modal" id="modalConta" hidden>
     <div class="janela" role="dialog" aria-modal="true" aria-labelledby="tituloModal">
       <div class="modal-topo">
@@ -104,7 +194,7 @@
   <script src="js/config.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/api.js"></script>
-  <script src="js/contas.js?v=2"></script>
+  <script src="js/contas.js?v=3"></script>
 </body>
 
 </html>

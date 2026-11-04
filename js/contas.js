@@ -956,6 +956,12 @@ window.addEventListener("load", () => {
         () => abrirFormulario()
     );
 
+        /* ======================================
+        DUPLICAR CONTAS
+        ====================================== */
+
+        configurarEventosDuplicarContas();
+
 
     /* ======================================
        MODAL DE CADASTRO
@@ -1070,3 +1076,138 @@ window.addEventListener("load", () => {
     }
 
 });
+
+
+/* ==========================================
+   DUPLICAR CONTAS - ABRIR MODAL
+========================================== */
+
+function abrirModalDuplicarContas() {
+
+    const filtroAno = document.getElementById("filtroAno");
+    const filtroMes = document.getElementById("filtroMes");
+
+    const anoOrigem = Number(filtroAno.value);
+    const mesOrigem = MESES.findIndex(
+            mes => normalizar(mes) === normalizar(filtroMes.value)
+        ) + 1;
+
+    if (!anoOrigem || !mesOrigem) {
+        alert("Selecione o ano e o mês de origem.");
+        return;
+    }
+
+    const modal = document.getElementById("modalDuplicarContas");
+
+    const periodoOrigem = document.getElementById(
+        "periodoOrigemDuplicacao"
+    );
+
+    const anoDestino = document.getElementById(
+        "anoDestinoDuplicacao"
+    );
+
+    const mesDestino = document.getElementById(
+        "mesDestinoDuplicacao"
+    );
+
+    const nomesMeses = [
+        "Janeiro", "Fevereiro", "Março", "Abril",
+        "Maio", "Junho", "Julho", "Agosto",
+        "Setembro", "Outubro", "Novembro", "Dezembro"
+    ];
+
+    periodoOrigem.textContent =
+        "Duplicar contas de " +
+        nomesMeses[mesOrigem - 1] +
+        "/" + anoOrigem;
+
+    mesDestino.innerHTML = "";
+
+    nomesMeses.forEach((nome, indice) => {
+
+        const option = document.createElement("option");
+
+        option.value = indice + 1;
+        option.textContent = nome;
+
+        mesDestino.appendChild(option);
+
+    });
+
+    // Selecionar automaticamente o mês seguinte.
+    const proximaData = new Date(
+        anoOrigem,
+        mesOrigem,
+        1
+    );
+
+    anoDestino.value = proximaData.getFullYear();
+    mesDestino.value = String(proximaData.getMonth() + 1);
+
+    modal.hidden = false;
+
+}
+
+
+/* ==========================================
+   DUPLICAR CONTAS - FECHAR MODAL
+========================================== */
+
+function fecharModalDuplicarContas() {
+
+    document.getElementById(
+        "modalDuplicarContas"
+    ).hidden = true;
+
+}
+
+
+/* ==========================================
+   DUPLICAR CONTAS - EVENTOS
+========================================== */
+
+function configurarEventosDuplicarContas() {
+
+    const btnDuplicar = document.getElementById(
+        "btnDuplicarContas"
+    );
+
+    const btnFechar = document.getElementById(
+        "fecharDuplicarContas"
+    );
+
+    const btnCancelar = document.getElementById(
+        "cancelarDuplicarContas"
+    );
+
+    btnDuplicar.addEventListener(
+        "click",
+        abrirModalDuplicarContas
+    );
+
+    btnFechar.addEventListener(
+        "click",
+        fecharModalDuplicarContas
+    );
+
+    btnCancelar.addEventListener(
+        "click",
+        fecharModalDuplicarContas
+    );
+
+    // A duplicação será implementada na próxima etapa.
+    document.getElementById(
+        "confirmarDuplicarContas"
+    ).addEventListener("click", () => {
+
+        alert(
+            "A duplicação será habilitada após " +
+            "a implementação da API."
+        );
+
+    });
+
+    btnDuplicar.disabled = false;
+
+}

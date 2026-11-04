@@ -550,3 +550,15 @@ td:nth-child(3) {
     text-align: right;
     padding-right: 145px;
 }
+
+/* ==========================================
+   BOTÕES - MINHAS CONTAS
+========================================== */
+
+.acoes-contas {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
