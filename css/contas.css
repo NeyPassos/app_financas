@@ -526,10 +526,21 @@ td:nth-child(3) {
     text-align: center;
 }
 
+
 /* 6 - Ações */
 .tabela-rolagem th:nth-child(6),
 .tabela-rolagem td:nth-child(6) {
     width: 21%;
-    text-align: right;
     white-space: nowrap;
+}
+
+/* Cabeçalho alinhado ao botão Pagar */
+.tabela-rolagem th:nth-child(6) {
+    text-align: left;
+    padding-left: 10px;
+}
+
+/* Manter os botões à direita */
+.tabela-rolagem td:nth-child(6) {
+    text-align: right;
 }
