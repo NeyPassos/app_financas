@@ -318,14 +318,14 @@ async function carregarModuloAtual() {
    SAIR DO GOOGLE
 ========================================== */
 
-function sairGoogle() {
 
-  if (accessToken && window.google?.accounts?.oauth2) {
+  function sairGoogle() {
 
-    google.accounts.oauth2.revoke(accessToken);
-  }
+    // Encerrar a sessão local sem revogar
+    // as permissões concedidas ao aplicativo.
 
   accessToken = null;
+
 
   sessionStorage.removeItem(CHAVE_SESSAO_GOOGLE);
 
