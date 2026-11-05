@@ -78,6 +78,8 @@ async function carregarDashboard() {
 
         paginaAtualDashboard = 1;
 
+        atualizarResumoEncerramentos();
+
         renderizarDashboard();
 
         mostrarStatus(
@@ -96,6 +98,73 @@ async function carregarDashboard() {
             "Erro ao carregar Dashboard: " +
             erro.message
         );
+
+    }
+
+}
+
+
+/* ==========================================
+   RESUMO DOS PARCELAMENTOS QUE TERMINAM
+   NO PRÓXIMO MÊS
+========================================== */
+
+function atualizarResumoEncerramentos() {
+
+    const comprasEncerrando = comprasDashboard.filter(
+        compra => {
+
+            const parcelaAtual = Number(
+                compra.parcela_atual || 0
+            );
+
+            const totalParcelas = Number(
+                compra.total_parcelas || 0
+            );
+
+            return totalParcelas - parcelaAtual === 1;
+
+        }
+    );
+
+    const quantidade = comprasEncerrando.length;
+
+    const total = comprasEncerrando.reduce(
+        (soma, compra) => {
+
+            const valor = Number(compra.valor_parcela);
+
+            return soma + (
+                Number.isFinite(valor) ? valor : 0
+            );
+
+        },
+        0
+    );
+
+    const elementoTotal = elementoDashboard(
+        "totalEncerramentos"
+    );
+
+    const elementoQuantidade = elementoDashboard(
+        "quantidadeEncerramentos"
+    );
+
+    if (elementoTotal) {
+
+        elementoTotal.textContent = total.toLocaleString(
+            "pt-BR",
+            {
+                style: "currency",
+                currency: "BRL"
+            }
+        );
+
+    }
+
+    if (elementoQuantidade) {
+
+        elementoQuantidade.textContent = quantidade;
 
     }
 
