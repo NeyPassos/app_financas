@@ -104,6 +104,19 @@ async function apiExcluirConta(id) {
 
 
 /* ==========================================
+   DUPLICAR CONTAS ENTRE MESES
+========================================== */
+
+async function apiDuplicarContasMes(dados) {
+
+    return executarAPI(
+        "duplicarContasMes",
+        [dados]
+    );
+
+}
+
+/* ==========================================
    APP FINANÇAS - API DE CARTÕES
 ========================================== */
 
