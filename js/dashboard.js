@@ -104,72 +104,100 @@ async function carregarDashboard() {
 }
 
 
+
 /* ==========================================
-   RESUMO DOS PARCELAMENTOS QUE TERMINAM
-   NO PRÓXIMO MÊS
+   RESUMO DOS PARCELAMENTOS
+   PREVISÃO PARA O PRÓXIMO MÊS
 ========================================== */
 
 function atualizarResumoEncerramentos() {
 
-    const comprasEncerrando = comprasDashboard.filter(
-        compra => {
+    let totalEncerramentos = 0;
+    let quantidadeEncerramentos = 0;
 
-            const parcelaAtual = Number(
-                compra.parcela_atual || 0
-            );
+    let totalParcelasContinuam = 0;
 
-            const totalParcelas = Number(
-                compra.total_parcelas || 0
-            );
+    comprasDashboard.forEach(compra => {
 
-            return totalParcelas - parcelaAtual === 1;
-
-        }
-    );
-
-    const quantidade = comprasEncerrando.length;
-
-    const total = comprasEncerrando.reduce(
-        (soma, compra) => {
-
-            const valor = Number(compra.valor_parcela);
-
-            return soma + (
-                Number.isFinite(valor) ? valor : 0
-            );
-
-        },
-        0
-    );
-
-    const elementoTotal = elementoDashboard(
-        "totalEncerramentos"
-    );
-
-    const elementoQuantidade = elementoDashboard(
-        "quantidadeEncerramentos"
-    );
-
-    if (elementoTotal) {
-
-        elementoTotal.textContent = total.toLocaleString(
-            "pt-BR",
-            {
-                style: "currency",
-                currency: "BRL"
-            }
+        const parcelaAtual = Number(
+            compra.parcela_atual || 0
         );
 
-    }
+        const totalParcelas = Number(
+            compra.total_parcelas || 0
+        );
 
-    if (elementoQuantidade) {
+        const restantes = totalParcelas - parcelaAtual;
 
-        elementoQuantidade.textContent = quantidade;
+        const valorParcela = Number(
+            compra.valor_parcela
+        );
 
-    }
+        if (
+            restantes <= 0 ||
+            !Number.isFinite(valorParcela)
+        ) {
+            return;
+        }
+
+        // Compras cuja próxima parcela será a última.
+        if (restantes === 1) {
+
+            totalEncerramentos += valorParcela;
+
+            quantidadeEncerramentos++;
+
+        }
+
+        // Compras que continuarão após o próximo mês.
+        if (restantes >= 2) {
+
+            totalParcelasContinuam += valorParcela;
+
+        }
+
+    });
+
+    const totalPrevistoProximoMes =
+        totalEncerramentos + totalParcelasContinuam;
+
+    const formatarMoeda = valor =>
+        valor.toLocaleString("pt-BR", {
+            style: "currency",
+            currency: "BRL"
+        });
+
+    const atualizarTexto = (id, valor) => {
+
+        const elemento = elementoDashboard(id);
+
+        if (elemento) {
+            elemento.textContent = valor;
+        }
+
+    };
+
+    atualizarTexto(
+        "totalEncerramentos",
+        formatarMoeda(totalEncerramentos)
+    );
+
+    atualizarTexto(
+        "quantidadeEncerramentos",
+        quantidadeEncerramentos
+    );
+
+    atualizarTexto(
+        "totalParcelasContinuam",
+        formatarMoeda(totalParcelasContinuam)
+    );
+
+    atualizarTexto(
+        "totalPrevistoProximoMes",
+        formatarMoeda(totalPrevistoProximoMes)
+    );
 
 }
-
 
 /* ==========================================
    RENDERIZAR DASHBOARD COM PAGINAÇÃO
