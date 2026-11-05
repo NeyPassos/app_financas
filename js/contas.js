@@ -1197,16 +1197,130 @@ function configurarEventosDuplicarContas() {
     );
 
     // A duplicação será implementada na próxima etapa.
-    document.getElementById(
-        "confirmarDuplicarContas"
-    ).addEventListener("click", () => {
+    
+document.getElementById("confirmarDuplicarContas")
+  .addEventListener("click", async () => {
 
-        alert(
-            "A duplicação será habilitada após " +
-            "a implementação da API."
+    const btnConfirmar = document.getElementById(
+      "confirmarDuplicarContas"
+    );
+
+    if (btnConfirmar.disabled) return;
+
+    const anoOrigem = Number(
+      document.getElementById("filtroAno").value
+    );
+
+    const mesOrigem = document.getElementById(
+      "filtroMes"
+    ).value;
+
+    const anoDestino = Number(
+      document.getElementById(
+        "anoDestinoDuplicacao"
+      ).value
+    );
+
+    const mesDestinoNumero = Number(
+      document.getElementById(
+        "mesDestinoDuplicacao"
+      ).value
+    );
+
+    const mesDestino = MESES[mesDestinoNumero - 1];
+
+    if (
+      !anoOrigem ||
+      !mesOrigem ||
+      !anoDestino ||
+      !mesDestino
+    ) {
+      alert("Informe os períodos de origem e destino.");
+      return;
+    }
+
+    if (
+      anoOrigem === anoDestino &&
+      normalizar(mesOrigem) === normalizar(mesDestino)
+    ) {
+      alert(
+        "O mês de destino deve ser diferente do mês de origem."
+      );
+      return;
+    }
+
+    const confirmar = confirm(
+      "Deseja duplicar as contas de " +
+      mesOrigem + "/" + anoOrigem +
+      " para " +
+      mesDestino + "/" + anoDestino + "?\n\n" +
+      "As faturas de cartão não serão copiadas.\n" +
+      "Os campos Parcela e Valor ficarão em branco."
+    );
+
+    if (!confirmar) return;
+
+    btnConfirmar.disabled = true;
+    btnConfirmar.textContent = "Duplicando...";
+
+    try {
+
+      const resposta = await apiDuplicarContasMes({
+        ano_origem: anoOrigem,
+        mes_origem: mesOrigem,
+        ano_destino: anoDestino,
+        mes_destino: mesDestino
+      });
+
+      // A API deve confirmar o sucesso da operação.
+      if (!resposta || resposta.sucesso === false) {
+        throw new Error(
+          resposta?.mensagem ||
+          "Não foi possível duplicar as contas."
         );
+      }
 
-    });
+      const quantidade = Number(
+        resposta.dados?.quantidade ??
+        resposta.data?.quantidade ??
+        0
+      );
+
+      alert(
+        quantidade > 0
+          ? quantidade + " conta(s) duplicada(s) com sucesso."
+          : "Nenhuma conta nova para duplicar."
+      );
+
+      fecharModalDuplicarContas();
+
+      // Atualizar a tabela no mês de destino.
+      document.getElementById("filtroAno").value =
+        String(anoDestino);
+
+      document.getElementById("filtroMes").value =
+        mesDestino;
+
+      await carregarContas();
+
+    } catch (erro) {
+
+      console.error("Erro ao duplicar contas:", erro);
+
+      alert(
+        "Erro ao duplicar contas: " +
+        (erro.message || String(erro))
+      );
+
+    } finally {
+
+      btnConfirmar.disabled = false;
+      btnConfirmar.textContent = "Duplicar contas";
+
+    }
+
+  });
+
 
     btnDuplicar.disabled = false;
 
