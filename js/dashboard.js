@@ -158,9 +158,7 @@ function atualizarResumoEncerramentos() {
 
     });
 
-    const totalPrevistoProximoMes =
-        totalEncerramentos + totalParcelasContinuam;
-
+    
     const formatarMoeda = valor =>
         valor.toLocaleString("pt-BR", {
             style: "currency",
@@ -192,11 +190,7 @@ function atualizarResumoEncerramentos() {
         formatarMoeda(totalParcelasContinuam)
     );
 
-    atualizarTexto(
-        "totalPrevistoProximoMes",
-        formatarMoeda(totalPrevistoProximoMes)
-    );
-
+    
 }
 
 /* ==========================================
